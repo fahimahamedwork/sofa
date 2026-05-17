@@ -13,6 +13,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - sofa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sofa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -24,6 +30,12 @@ services:
       - redis_data:/data
     networks:
       - sofa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   traefik:
     image: traefik:v3
@@ -49,6 +61,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_acme:/acme.json
+    # Fix acme.json permissions on startup
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        chmod 600 /acme.json 2>/dev/null || true
+        /entrypoint.sh traefik
     networks:
       - sofa-network
 
@@ -78,8 +97,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - build_cache:/root/.cache
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - sofa-network
 

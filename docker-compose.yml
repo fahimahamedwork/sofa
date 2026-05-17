@@ -89,7 +89,7 @@ services:
     container_name: sofa-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "7632:80"
     depends_on:
       - backend
     networks:

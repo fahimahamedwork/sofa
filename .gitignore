@@ -42,3 +42,9 @@ dev.log
 
 # Build artifacts
 build/
+
+# Next.js build
+.next/
+
+# Uploads
+upload/

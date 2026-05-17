@@ -43,9 +43,9 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
+      - "8081:80"
+      - "8443:443"
+      - "8082:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik_acme:/acme.json
@@ -59,18 +59,19 @@ services:
     container_name: sofa-backend
     restart: unless-stopped
     environment:
-      - SOFA_DB_HOST=postgres
-      - SOFA_DB_PORT=5432
-      - SOFA_DB_USER=sofa
-      - SOFA_DB_PASSWORD=sofa
-      - SOFA_DB_NAME=sofa
+      - SOFA_DATABASE_HOST=postgres
+      - SOFA_DATABASE_PORT=5432
+      - SOFA_DATABASE_USER=sofa
+      - SOFA_DATABASE_PASSWORD=sofa
+      - SOFA_DATABASE_DBNAME=sofa
+      - SOFA_DATABASE_SSLMODE=disable
       - SOFA_REDIS_HOST=redis
       - SOFA_REDIS_PORT=6379
-      - SOFA_JWT_SECRET=sofa-production-secret-change-me
-      - SOFA_ADMIN_PASSWORD=admin
-      - SOFA_DOCKER_SOCKET=/var/run/docker.sock
+      - SOFA_AUTH_JWT_SECRET=sofa-production-secret-change-me
+      - SOFA_AUTH_ADMIN_PASSWORD=admin
+      - SOFA_DOCKER_SOCKET_PATH=/var/run/docker.sock
       - SOFA_TRAEFIK_API_URL=http://traefik:8080
-      - SOFA_BASE_DOMAIN=localhost
+      - SOFA_TRAEFIK_BASE_DOMAIN=localhost
     ports:
       - "8000:8080"
     volumes:

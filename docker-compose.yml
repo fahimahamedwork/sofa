@@ -1,0 +1,108 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sofa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sofa
+      POSTGRES_PASSWORD: sofa
+      POSTGRES_DB: sofa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sofa-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sofa-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sofa-network
+
+  traefik:
+    image: traefik:v3
+    container_name: sofa-traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=sofa-network"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@sofa.local"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_acme:/acme.json
+    networks:
+      - sofa-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sofa-backend
+    restart: unless-stopped
+    environment:
+      - SOFA_DB_HOST=postgres
+      - SOFA_DB_PORT=5432
+      - SOFA_DB_USER=sofa
+      - SOFA_DB_PASSWORD=sofa
+      - SOFA_DB_NAME=sofa
+      - SOFA_REDIS_HOST=redis
+      - SOFA_REDIS_PORT=6379
+      - SOFA_JWT_SECRET=sofa-production-secret-change-me
+      - SOFA_ADMIN_PASSWORD=admin
+      - SOFA_DOCKER_SOCKET=/var/run/docker.sock
+      - SOFA_TRAEFIK_API_URL=http://traefik:8080
+      - SOFA_BASE_DOMAIN=localhost
+    ports:
+      - "8000:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - build_cache:/root/.cache
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sofa-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sofa-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - sofa-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  traefik_acme:
+  build_cache:
+
+networks:
+  sofa-network:
+    external: true

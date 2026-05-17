@@ -36,7 +36,13 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Unwrap backend {success: true, data: ...} envelope
+    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('sofa_token');
@@ -100,8 +106,8 @@ export const databasesApi = {
 
 // Metrics
 export const metricsApi = {
-  getAppMetrics: (slug: string) => api.get<AppMetrics>(`/apps/${slug}/metrics`),
-  getServerStats: () => api.get<ServerStats>('/server/stats'),
+  getAppMetrics: (id: string) => api.get<AppMetrics>(`/metrics/apps/${id}`),
+  getServerStats: () => api.get<ServerStats>('/metrics/server'),
 };
 
 // Settings
@@ -117,5 +123,10 @@ export const settingsApi = {
 export const activityApi = {
   getRecent: () => api.get<Activity[]>('/activity'),
 };
+
+// Helper to unwrap backend {success, data} response
+export function unwrap<T>(resp: { data: { success: boolean; data: T } }): T {
+  return resp.data.data;
+}
 
 export default api;

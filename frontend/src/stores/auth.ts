@@ -17,8 +17,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (password: string) => {
     const { data } = await authApi.login({ password });
-    localStorage.setItem('sofa_token', data.token);
-    set({ token: data.token, isAuthenticated: true });
+    // Response interceptor unwraps {success, data} envelope
+    const token = data.token;
+    localStorage.setItem('sofa_token', token);
+    set({ token, isAuthenticated: true });
   },
 
   logout: () => {

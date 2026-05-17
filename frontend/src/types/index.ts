@@ -157,6 +157,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  expires_at: number;
 }
 
 export interface CreateAppRequest {

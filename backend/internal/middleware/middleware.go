@@ -92,24 +92,9 @@ func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 func CORSConfig() gin.HandlerFunc {
         return func(c *gin.Context) {
                 origin := c.GetHeader("Origin")
-                allowedOrigins := []string{
-                        "http://localhost:3000",
-                        "http://localhost:5173",
-                        "http://localhost:7632",
-                        "http://127.0.0.1:3000",
-                        "http://127.0.0.1:5173",
-                        "http://127.0.0.1:7632",
-                }
 
-                isAllowed := false
-                for _, o := range allowedOrigins {
-                        if origin == o {
-                                isAllowed = true
-                                break
-                        }
-                }
-
-                if isAllowed {
+                // Allow any origin since this is a personal self-hosted panel
+                if origin != "" {
                         c.Header("Access-Control-Allow-Origin", origin)
                 }
 

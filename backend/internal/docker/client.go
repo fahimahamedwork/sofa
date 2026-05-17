@@ -65,7 +65,7 @@ func (d *DockerClient) EnsureNetwork(ctx context.Context, networkName string) er
         filter := filters.NewArgs()
         filter.Add("name", networkName)
 
-        networks, err := d.cli.NetworkList(ctx, types.NetworkListOptions{Filters: filter})
+        networks, err := d.cli.NetworkList(ctx, network.ListOptions{Filters: filter})
         if err != nil {
                 return fmt.Errorf("listing networks: %w", err)
         }
@@ -78,7 +78,7 @@ func (d *DockerClient) EnsureNetwork(ctx context.Context, networkName string) er
         }
 
         // Create the network
-        _, err = d.cli.NetworkCreate(ctx, networkName, types.NetworkCreate{
+        _, err = d.cli.NetworkCreate(ctx, networkName, network.CreateOptions{
                 Driver:     "bridge",
                 CheckDuplicate: true,
                 Labels: map[string]string{

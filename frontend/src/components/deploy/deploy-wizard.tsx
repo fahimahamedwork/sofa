@@ -67,21 +67,21 @@ export function DeployWizard() {
                   ? 'bg-emerald-600 text-white'
                   : currentStep === step.id
                   ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600'
-                  : 'bg-zinc-800 text-zinc-500'
+                  : 'bg-muted text-muted-foreground'
               )}
             >
               {currentStep > step.id ? <Check className="h-4 w-4" /> : step.id}
             </div>
             <span className={cn(
               'text-sm font-medium hidden sm:inline',
-              currentStep >= step.id ? 'text-zinc-200' : 'text-zinc-500'
+              currentStep >= step.id ? 'text-foreground' : 'text-muted-foreground'
             )}>
               {step.label}
             </span>
             {idx < steps.length - 1 && (
               <div className={cn(
                 'w-8 h-px mx-1',
-                currentStep > step.id ? 'bg-emerald-600' : 'bg-zinc-800'
+                currentStep > step.id ? 'bg-emerald-600' : 'bg-muted'
               )} />
             )}
           </div>
@@ -100,14 +100,14 @@ export function DeployWizard() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-zinc-100">Choose source</h2>
-                <p className="text-sm text-zinc-400 mt-1">Select where your application code lives</p>
+                <h2 className="text-lg font-semibold text-foreground">Choose source</h2>
+                <p className="text-sm text-muted-foreground mt-1">Select where your application code lives</p>
               </div>
               <SourceSelector value={sourceType} onChange={setSourceType} />
               {sourceType && (
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-1.5 block">
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">
                       {sourceType === 'git' ? 'Repository URL' : sourceType === 'docker-image' ? 'Image URL' : 'Repository URL'}
                     </label>
                     <Input
@@ -122,7 +122,7 @@ export function DeployWizard() {
                   </div>
                   {sourceType === 'git' && (
                     <div>
-                      <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Branch</label>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">Branch</label>
                       <Input
                         placeholder="main"
                         value={branch}
@@ -138,12 +138,12 @@ export function DeployWizard() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-zinc-100">Configure application</h2>
-                <p className="text-sm text-zinc-400 mt-1">Set up your application settings</p>
+                <h2 className="text-lg font-semibold text-foreground">Configure application</h2>
+                <p className="text-sm text-muted-foreground mt-1">Set up your application settings</p>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Application Name</label>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Application Name</label>
                   <Input
                     placeholder="my-awesome-app"
                     value={appName}
@@ -151,7 +151,7 @@ export function DeployWizard() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Framework</label>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Framework</label>
                   <Input
                     placeholder="next, react, node, etc."
                     value={framework}
@@ -160,7 +160,7 @@ export function DeployWizard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Build Command</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Build Command</label>
                     <Input
                       placeholder="npm run build"
                       value={buildCmd}
@@ -168,7 +168,7 @@ export function DeployWizard() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Port</label>
+                    <label className="text-sm font-medium text-foreground mb-1.5 block">Port</label>
                     <Input
                       placeholder="3000"
                       value={port}
@@ -183,43 +183,43 @@ export function DeployWizard() {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-zinc-100">Review & Deploy</h2>
-                <p className="text-sm text-zinc-400 mt-1">Review your configuration before deploying</p>
+                <h2 className="text-lg font-semibold text-foreground">Review & Deploy</h2>
+                <p className="text-sm text-muted-foreground mt-1">Review your configuration before deploying</p>
               </div>
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3">
+              <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Name</span>
-                  <span className="text-zinc-200 font-medium">{appName}</span>
+                  <span className="text-muted-foreground">Name</span>
+                  <span className="text-foreground font-medium">{appName}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Source Type</span>
-                  <span className="text-zinc-200 font-medium capitalize">{sourceType?.replace('-', ' ')}</span>
+                  <span className="text-muted-foreground">Source Type</span>
+                  <span className="text-foreground font-medium capitalize">{sourceType?.replace('-', ' ')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Source URL</span>
-                  <span className="text-zinc-200 font-medium font-mono text-xs">{sourceUrl}</span>
+                  <span className="text-muted-foreground">Source URL</span>
+                  <span className="text-foreground font-medium font-mono text-xs">{sourceUrl}</span>
                 </div>
                 {sourceType === 'git' && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Branch</span>
-                    <span className="text-zinc-200 font-medium">{branch}</span>
+                    <span className="text-muted-foreground">Branch</span>
+                    <span className="text-foreground font-medium">{branch}</span>
                   </div>
                 )}
                 {framework && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Framework</span>
-                    <span className="text-zinc-200 font-medium">{framework}</span>
+                    <span className="text-muted-foreground">Framework</span>
+                    <span className="text-foreground font-medium">{framework}</span>
                   </div>
                 )}
                 {buildCmd && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Build Command</span>
-                    <span className="text-zinc-200 font-mono text-xs">{buildCmd}</span>
+                    <span className="text-muted-foreground">Build Command</span>
+                    <span className="text-foreground font-mono text-xs">{buildCmd}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Port</span>
-                  <span className="text-zinc-200 font-medium">{port}</span>
+                  <span className="text-muted-foreground">Port</span>
+                  <span className="text-foreground font-medium">{port}</span>
                 </div>
               </div>
             </div>
@@ -228,7 +228,7 @@ export function DeployWizard() {
       </AnimatePresence>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between mt-8 pt-6 border-t border-zinc-800">
+      <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
         <Button
           variant="outline"
           onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}

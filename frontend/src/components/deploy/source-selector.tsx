@@ -43,20 +43,20 @@ export function SourceSelector({ value, onChange }: SourceSelectorProps) {
               'relative flex flex-col items-start gap-3 rounded-lg border p-4 text-left transition-all cursor-pointer',
               isSelected
                 ? 'border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/50'
-                : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700 hover:bg-zinc-900/80'
+                : 'border-border bg-card hover:border-border hover:bg-card/80'
             )}
           >
             <div className={cn(
               'rounded-md p-2',
-              isSelected ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-400'
+              isSelected ? 'bg-emerald-500/10 text-emerald-400' : 'bg-muted text-muted-foreground'
             )}>
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <p className={cn('font-medium text-sm', isSelected ? 'text-emerald-400' : 'text-zinc-200')}>
+              <p className={cn('font-medium text-sm', isSelected ? 'text-emerald-400' : 'text-foreground')}>
                 {source.label}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">{source.description}</p>
+              <p className="text-xs text-muted-foreground mt-1">{source.description}</p>
             </div>
             {isSelected && (
               <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-emerald-500" />

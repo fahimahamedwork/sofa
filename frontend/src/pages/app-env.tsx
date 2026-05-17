@@ -42,7 +42,7 @@ export function AppEnvPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-100">Environment Variables</h2>
+        <h2 className="text-lg font-semibold text-foreground">Environment Variables</h2>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -63,7 +63,7 @@ export function AppEnvPage() {
               </DialogHeader>
               <div className="space-y-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Key</label>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Key</label>
                   <Input
                     placeholder="DATABASE_URL"
                     value={newKey}
@@ -72,7 +72,7 @@ export function AppEnvPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Value</label>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">Value</label>
                   <Input
                     placeholder="postgres://..."
                     value={newValue}
@@ -97,7 +97,7 @@ export function AppEnvPage() {
               <Skeleton key={i} className="h-10 mb-2" />
             ))
           ) : !envVars || envVars.length === 0 ? (
-            <p className="text-sm text-zinc-500 text-center py-8">No environment variables</p>
+            <p className="text-sm text-muted-foreground text-center py-8">No environment variables</p>
           ) : (
             <div>
               {envVars.map((envVar) => (

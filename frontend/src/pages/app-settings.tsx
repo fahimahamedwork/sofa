@@ -66,7 +66,7 @@ export function AppSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h2 className="text-lg font-semibold text-zinc-100">Settings</h2>
+      <h2 className="text-lg font-semibold text-foreground">Settings</h2>
 
       {/* General */}
       <Card>
@@ -76,21 +76,21 @@ export function AppSettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Application Name</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Application Name</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Port</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Port</label>
               <Input value={port} onChange={(e) => setPort(e.target.value)} type="number" />
             </div>
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Framework</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Framework</label>
               <Input value={app?.framework || ''} disabled />
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Build Command</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Build Command</label>
             <Input value={buildCmd} onChange={(e) => setBuildCmd(e.target.value)} placeholder="npm run build" />
           </div>
           <Button onClick={handleSave} disabled={updateApp.isPending}>
@@ -108,11 +108,11 @@ export function AppSettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Memory Limit (MB)</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Memory Limit (MB)</label>
               <Input value={memoryLimit} onChange={(e) => setMemoryLimit(e.target.value)} type="number" placeholder="512" />
             </div>
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-1.5 block">CPU Limit (cores)</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">CPU Limit (cores)</label>
               <Input value={cpuLimit} onChange={(e) => setCpuLimit(e.target.value)} type="number" step="0.5" placeholder="1" />
             </div>
           </div>
@@ -141,7 +141,7 @@ export function AppSettingsPage() {
           </Alert>
           <div className="flex items-end gap-3">
             <div className="flex-1">
-              <label className="text-sm font-medium text-zinc-300 mb-1.5 block">
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
                 Type <span className="font-mono text-red-400">{app?.name}</span> to confirm
               </label>
               <Input

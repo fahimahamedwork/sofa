@@ -105,7 +105,7 @@ export function WebTerminal({ appId, className }: WebTerminalProps) {
   }, [appId]);
 
   return (
-    <div className={cn('rounded-md border border-zinc-800 overflow-hidden', className)}>
+    <div className={cn('rounded-md border border-border overflow-hidden', className)}>
       <div ref={termRef} className="h-[500px] w-full" />
     </div>
   );

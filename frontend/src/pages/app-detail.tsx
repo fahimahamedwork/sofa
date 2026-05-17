@@ -43,7 +43,7 @@ export function AppDetailPage() {
   if (!app) {
     return (
       <div className="text-center py-16">
-        <p className="text-zinc-500">Application not found</p>
+        <p className="text-muted-foreground">Application not found</p>
         <Link to="/apps">
           <Button variant="outline" className="mt-4">Back to Applications</Button>
         </Link>
@@ -64,12 +64,12 @@ export function AppDetailPage() {
               'h-3 w-3 rounded-full',
               status === 'running' ? 'bg-emerald-500' :
               status === 'building' ? 'bg-amber-500 animate-pulse-subtle' :
-              'bg-zinc-500'
+              'bg-muted-foreground'
             )} />
-            <h1 className="text-2xl font-bold text-zinc-50">{app.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{app.name}</h1>
             <StatusBadge status={status} />
           </div>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {app.framework || 'N/A'} &middot; Port {app.port || 'N/A'} &middot; {app.sourceType}
           </p>
         </div>
@@ -90,7 +90,7 @@ export function AppDetailPage() {
       </div>
 
       {/* Sub-navigation */}
-      <div className="flex items-center gap-1 border-b border-zinc-800 -mb-6 pb-0 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-border -mb-6 pb-0 overflow-x-auto">
         {subNav.map((item) => {
           const fullPath = item.path ? `${basePath}${item.path}` : basePath;
           const isActive = location.pathname === fullPath;
@@ -102,8 +102,8 @@ export function AppDetailPage() {
               className={cn(
                 'px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
                 isActive
-                  ? 'text-emerald-400 border-emerald-400'
-                  : 'text-zinc-400 border-transparent hover:text-zinc-200'
+                  ? 'text-primary border-primary'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
               )}
             >
               {item.label}
@@ -122,30 +122,30 @@ export function AppDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Status</span>
+                <span className="text-muted-foreground">Status</span>
                 <StatusBadge status={status} />
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Framework</span>
-                <span className="text-zinc-200">{app.framework || 'N/A'}</span>
+                <span className="text-muted-foreground">Framework</span>
+                <span className="text-foreground">{app.framework || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Source</span>
+                <span className="text-muted-foreground">Source</span>
                 <Badge variant="secondary" className="text-[10px]">{app.sourceType}</Badge>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Source URL</span>
-                <span className="text-zinc-200 font-mono text-xs truncate max-w-[200px]">{app.sourceUrl || 'N/A'}</span>
+                <span className="text-muted-foreground">Source URL</span>
+                <span className="text-foreground font-mono text-xs truncate max-w-[200px]">{app.sourceUrl || 'N/A'}</span>
               </div>
               {app.branch && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Branch</span>
-                  <span className="text-zinc-200 font-mono text-xs">{app.branch}</span>
+                  <span className="text-muted-foreground">Branch</span>
+                  <span className="text-foreground font-mono text-xs">{app.branch}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Port</span>
-                <span className="text-zinc-200">{app.port || 'N/A'}</span>
+                <span className="text-muted-foreground">Port</span>
+                <span className="text-foreground">{app.port || 'N/A'}</span>
               </div>
             </CardContent>
           </Card>
@@ -190,7 +190,7 @@ export function AppDetailPage() {
                 {domains.map((domain) => (
                   <div key={domain.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-zinc-200">{domain.domain}</span>
+                      <span className="text-foreground">{domain.domain}</span>
                       {domain.type === 'primary' && (
                         <Badge variant="running" className="text-[10px]">Primary</Badge>
                       )}

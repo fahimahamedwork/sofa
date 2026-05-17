@@ -35,22 +35,22 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-zinc-800 bg-zinc-950 transition-all duration-300',
+          'fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300',
           sidebarCollapsed ? 'w-16' : 'w-60',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="flex h-14 items-center border-b border-zinc-800 px-4">
+        <div className="flex h-14 items-center border-b border-sidebar-border px-4">
           <div className="flex items-center gap-2">
-            <Sofa className="h-6 w-6 text-emerald-500 shrink-0" />
+            <Sofa className="h-6 w-6 text-sidebar-primary shrink-0" />
             {!sidebarCollapsed && (
-              <span className="text-lg font-bold text-zinc-50">Sofa</span>
+              <span className="text-lg font-bold text-sidebar-primary-foreground">Sofa</span>
             )}
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto rounded-md p-1 text-zinc-400 hover:text-zinc-200 lg:hidden"
+            className="ml-auto rounded-md p-1 text-sidebar-foreground hover:text-sidebar-primary-foreground lg:hidden"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -70,11 +70,11 @@ export function Sidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-emerald-600/10 text-emerald-400'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                    ? 'bg-sidebar-accent text-sidebar-primary'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 )}
               >
-                <item.icon className={cn('h-5 w-5 shrink-0', isActive && 'text-emerald-400')} />
+                <item.icon className={cn('h-5 w-5 shrink-0', isActive && 'text-sidebar-primary')} />
                 {!sidebarCollapsed && <span>{item.label}</span>}
               </NavLink>
             );
@@ -82,10 +82,10 @@ export function Sidebar() {
         </nav>
 
         {/* Collapse toggle */}
-        <div className="hidden border-t border-zinc-800 p-2 lg:block">
+        <div className="hidden border-t border-sidebar-border p-2 lg:block">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="flex w-full items-center justify-center rounded-md p-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="flex w-full items-center justify-center rounded-md p-2 text-sidebar-foreground hover:text-sidebar-primary-foreground transition-colors"
           >
             <ChevronLeft className={cn('h-4 w-4 transition-transform', sidebarCollapsed && 'rotate-180')} />
           </button>
@@ -93,8 +93,8 @@ export function Sidebar() {
 
         {/* Version */}
         {!sidebarCollapsed && (
-          <div className="border-t border-zinc-800 px-4 py-3">
-            <p className="text-xs text-zinc-600">Sofa v0.1.0</p>
+          <div className="border-t border-sidebar-border px-4 py-3">
+            <p className="text-xs text-muted-foreground">Sofa v0.1.0</p>
           </div>
         )}
       </aside>

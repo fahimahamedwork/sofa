@@ -8,7 +8,7 @@ export function AppLayout() {
   const { sidebarCollapsed } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       <div className={cn(
         'flex flex-col transition-all duration-300',

@@ -49,7 +49,7 @@ export function EnvVarRow({ envVar, onUpdate, onDelete }: EnvVarRowProps) {
           <Check className="h-3.5 w-3.5 text-emerald-400" />
         </Button>
         <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={handleCancel}>
-          <X className="h-3.5 w-3.5 text-zinc-400" />
+          <X className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
       </div>
     );
@@ -57,13 +57,13 @@ export function EnvVarRow({ envVar, onUpdate, onDelete }: EnvVarRowProps) {
 
   return (
     <div className="flex items-center gap-2 py-2 group">
-      <span className="text-sm font-mono text-zinc-200 flex-1 min-w-0 truncate">{envVar.key}</span>
-      <span className="text-sm font-mono text-zinc-500 flex-1 min-w-0 truncate">
+      <span className="text-sm font-mono text-foreground flex-1 min-w-0 truncate">{envVar.key}</span>
+      <span className="text-sm font-mono text-muted-foreground flex-1 min-w-0 truncate">
         {'••••••••'}
       </span>
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditing(true)}>
-          <Pencil className="h-3.5 w-3.5 text-zinc-400" />
+          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => onDelete?.(envVar.id)}>
           <Trash2 className="h-3.5 w-3.5 text-red-400" />

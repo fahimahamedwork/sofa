@@ -67,8 +67,8 @@ export function DatabasesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50">Databases</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage provisioned databases</p>
+          <h1 className="text-2xl font-bold text-foreground">Databases</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage provisioned databases</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -82,7 +82,7 @@ export function DatabasesPage() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Type</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   {(['postgresql', 'mysql', 'redis', 'mongodb'] as DatabaseType[]).map((type) => (
                     <button
@@ -92,7 +92,7 @@ export function DatabasesPage() {
                         'flex items-center gap-2 rounded-md border p-2.5 text-sm font-medium transition-colors cursor-pointer',
                         dbType === type
                           ? 'border-emerald-600 bg-emerald-600/5 text-emerald-400'
-                          : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-600'
+                          : 'border-input bg-card text-foreground hover:border-border'
                       )}
                     >
                       <DbIcon className="h-4 w-4" />
@@ -102,7 +102,7 @@ export function DatabasesPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Connection String</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Connection String</label>
                 <Input
                   placeholder="postgres://user:pass@host:5432/dbname"
                   value={connectionString}
@@ -128,7 +128,7 @@ export function DatabasesPage() {
       ) : !databases || databases.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-sm text-zinc-500">No databases provisioned</p>
+            <p className="text-sm text-muted-foreground">No databases provisioned</p>
           </CardContent>
         </Card>
       ) : (
@@ -138,7 +138,7 @@ export function DatabasesPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Badge className={cn('text-[10px]', dbTypeColors[db.type as DatabaseType] || 'bg-zinc-700 text-zinc-300')}>
+                    <Badge className={cn('text-[10px]', dbTypeColors[db.type as DatabaseType] || 'bg-muted text-foreground')}>
                       {db.type}
                     </Badge>
                     <CardTitle className="text-base">Database #{db.id}</CardTitle>

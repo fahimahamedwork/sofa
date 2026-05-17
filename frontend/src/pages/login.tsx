@@ -29,7 +29,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
       {/* Grid pattern background */}
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -40,55 +40,54 @@ export function LoginPage() {
       />
 
       {/* Glow effect */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-600/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Card className="w-full max-w-sm relative z-10 border-zinc-800 bg-zinc-900/80 backdrop-blur-sm">
+      <Card className="w-full max-w-sm relative z-10 bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="rounded-xl bg-emerald-600/10 p-3 ring-1 ring-emerald-600/20">
-              <Sofa className="h-8 w-8 text-emerald-500" />
+            <div className="rounded-xl bg-primary/10 p-3 ring-1 ring-primary/20">
+              <Sofa className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-xl text-zinc-50">Welcome to Sofa</CardTitle>
-          <CardDescription className="text-zinc-400">Sign in to your hosting panel</CardDescription>
+          <CardTitle className="text-xl">Welcome to Sofa</CardTitle>
+          <CardDescription>Sign in to your hosting panel</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-300">Username</label>
+              <label className="text-sm font-medium text-foreground">Username</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="admin"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="pl-9 bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-emerald-500"
+                  className="pl-9"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-300">Password</label>
+              <label className="text-sm font-medium text-foreground">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9 bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-emerald-500"
                   autoFocus
                 />
               </div>
             </div>
             <Button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full"
               disabled={loading || !password}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Signing in...
                 </span>
               ) : (
@@ -96,7 +95,7 @@ export function LoginPage() {
               )}
             </Button>
           </form>
-          <p className="text-xs text-zinc-600 text-center mt-4">
+          <p className="text-xs text-muted-foreground text-center mt-4">
             Self-hosted PaaS panel
           </p>
         </CardContent>

@@ -26,8 +26,8 @@ export function AppsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50">Applications</h1>
-          <p className="text-sm text-zinc-400 mt-1">Manage your deployed applications</p>
+          <h1 className="text-2xl font-bold text-foreground">Applications</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage your deployed applications</p>
         </div>
         <Link to="/apps/new">
           <Button>
@@ -39,7 +39,7 @@ export function AppsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search applications..."
             value={search}
@@ -47,11 +47,11 @@ export function AppsPage() {
             className="pl-9"
           />
         </div>
-        <div className="flex items-center border border-zinc-800 rounded-md">
+        <div className="flex items-center border border-border rounded-md">
           <button
             onClick={() => setView('grid')}
             className={`p-1.5 rounded-l-md transition-colors ${
-              view === 'grid' ? 'bg-zinc-800 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
+              view === 'grid' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <LayoutGrid className="h-4 w-4" />
@@ -59,7 +59,7 @@ export function AppsPage() {
           <button
             onClick={() => setView('list')}
             className={`p-1.5 rounded-r-md transition-colors ${
-              view === 'list' ? 'bg-zinc-800 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
+              view === 'list' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <List className="h-4 w-4" />
@@ -76,7 +76,7 @@ export function AppsPage() {
         </div>
       ) : filteredApps.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-zinc-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             {search ? 'No applications match your search' : 'No applications yet'}
           </p>
           {!search && (
@@ -98,8 +98,8 @@ export function AppsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-zinc-800 overflow-hidden">
-          <div className="bg-zinc-900 px-4 py-2 flex items-center gap-4 text-xs font-medium text-zinc-500 border-b border-zinc-800">
+        <div className="rounded-lg border border-border overflow-hidden">
+          <div className="bg-muted px-4 py-2 flex items-center gap-4 text-xs font-medium text-muted-foreground border-b border-border">
             <span className="w-2.5" />
             <span className="w-40">Name</span>
             <span className="w-20">Framework</span>

@@ -34,8 +34,8 @@ export function DashboardPage() {
     <div className="space-y-6">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50">Dashboard</h1>
-        <p className="text-sm text-zinc-400 mt-1">Overview of your hosting environment</p>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Overview of your hosting environment</p>
       </div>
 
       {/* Stat cards */}
@@ -47,7 +47,7 @@ export function DashboardPage() {
         ) : (
           <>
             <StatCard icon={Play} label="Running Apps" value={running} iconColor="text-emerald-400" />
-            <StatCard icon={Square} label="Stopped Apps" value={stopped} iconColor="text-zinc-400" />
+            <StatCard icon={Square} label="Stopped Apps" value={stopped} iconColor="text-muted-foreground" />
             <StatCard icon={Package} label="Building" value={building} iconColor="text-amber-400" />
             <StatCard icon={HardDrive} label="Disk Used" value={diskUsed} iconColor="text-sky-400" />
           </>
@@ -112,22 +112,22 @@ export function DashboardPage() {
                   <Link
                     key={app.id}
                     to={`/apps/${app.id}`}
-                    className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-zinc-800/50 transition-colors"
+                    className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`h-2 w-2 rounded-full ${
                         app.status === 'running' ? 'bg-emerald-500' :
                         app.status === 'building' ? 'bg-amber-500' :
-                        'bg-zinc-500'
+                        'bg-muted-foreground'
                       }`} />
-                      <span className="text-sm text-zinc-200">{app.name}</span>
+                      <span className="text-sm text-foreground">{app.name}</span>
                     </div>
                     <StatusBadge status={app.status || 'stopped'} />
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-zinc-500 text-center py-4">No applications yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No applications yet</p>
             )}
           </CardContent>
         </Card>

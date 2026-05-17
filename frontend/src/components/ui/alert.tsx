@@ -15,11 +15,11 @@ const alertIcons = {
 };
 
 const alertStyles = {
-  default: 'border-zinc-800 bg-zinc-900 text-zinc-200',
-  destructive: 'border-red-900/50 bg-red-950/50 text-red-200',
-  success: 'border-emerald-900/50 bg-emerald-950/50 text-emerald-200',
-  warning: 'border-amber-900/50 bg-amber-950/50 text-amber-200',
-  info: 'border-sky-900/50 bg-sky-950/50 text-sky-200',
+  default: 'border-border bg-card text-foreground',
+  destructive: 'border-destructive/50 bg-destructive/10 text-destructive',
+  success: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400',
+  warning: 'border-amber-500/50 bg-amber-500/10 text-amber-400',
+  info: 'border-sky-500/50 bg-sky-500/10 text-sky-400',
 };
 
 function Alert({ className, variant = 'default', children, ...props }: AlertProps) {

@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 
 const activityIcons: Record<Activity['type'], { icon: typeof Rocket; color: string }> = {
   deploy: { icon: Rocket, color: 'text-amber-400 bg-amber-400/10' },
-  start: { icon: Play, color: 'text-emerald-400 bg-emerald-400/10' },
-  stop: { icon: Square, color: 'text-zinc-400 bg-zinc-400/10' },
+  start: { icon: Play, color: 'text-primary bg-primary/10' },
+  stop: { icon: Square, color: 'text-muted-foreground bg-muted' },
   restart: { icon: RotateCcw, color: 'text-sky-400 bg-sky-400/10' },
-  error: { icon: AlertTriangle, color: 'text-red-400 bg-red-400/10' },
+  error: { icon: AlertTriangle, color: 'text-destructive bg-destructive/10' },
   domain: { icon: Globe, color: 'text-purple-400 bg-purple-400/10' },
   database: { icon: Database, color: 'text-cyan-400 bg-cyan-400/10' },
 };
@@ -21,7 +21,7 @@ interface ActivityFeedProps {
 export function ActivityFeed({ activities, className }: ActivityFeedProps) {
   if (!activities.length) {
     return (
-      <div className={cn('py-8 text-center text-sm text-zinc-500', className)}>
+      <div className={cn('py-8 text-center text-sm text-muted-foreground', className)}>
         No recent activity
       </div>
     );
@@ -38,8 +38,8 @@ export function ActivityFeed({ activities, className }: ActivityFeedProps) {
               <Icon className="h-3.5 w-3.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-zinc-200">{activity.message}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <p className="text-sm text-foreground">{activity.message}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {activity.appName} &middot; {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
               </p>
             </div>

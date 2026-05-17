@@ -22,7 +22,7 @@ const levelColors: Record<string, string> = {
   WARN: 'text-amber-400',
   WARNING: 'text-amber-400',
   ERROR: 'text-red-400',
-  DEBUG: 'text-zinc-500',
+  DEBUG: 'text-muted-foreground',
   FATAL: 'text-red-500',
 };
 
@@ -93,9 +93,9 @@ export function LogViewer({ appId, className }: LogViewerProps) {
   return (
     <div className={cn('flex flex-col', className)}>
       {/* Toolbar */}
-      <div className="flex items-center gap-2 pb-3 border-b border-zinc-800">
+      <div className="flex items-center gap-2 pb-3 border-b border-border">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Filter logs..."
             value={filter}
@@ -117,20 +117,20 @@ export function LogViewer({ appId, className }: LogViewerProps) {
       </div>
 
       {/* Log content */}
-      <ScrollArea className="flex-1 bg-zinc-950 rounded-md mt-2 border border-zinc-800">
+      <ScrollArea className="flex-1 bg-background rounded-md mt-2 border border-border">
         <div className="p-3 font-mono text-xs leading-5 min-h-[300px] max-h-[500px]">
           {filteredLogs.length === 0 ? (
-            <p className="text-zinc-600">No logs available. Waiting for output...</p>
+            <p className="text-muted-foreground">No logs available. Waiting for output...</p>
           ) : (
             filteredLogs.map((entry, idx) => (
               <div key={idx} className="flex gap-2">
-                <span className="text-zinc-600 shrink-0">
+                <span className="text-muted-foreground shrink-0">
                   {new Date(entry.timestamp).toLocaleTimeString()}
                 </span>
                 <span className={cn('shrink-0 w-12', levelColors[entry.level] || levelColors.INFO)}>
                   {entry.level}
                 </span>
-                <span className="text-zinc-300 break-all">{entry.message}</span>
+                <span className="text-foreground break-all">{entry.message}</span>
               </div>
             ))
           )}

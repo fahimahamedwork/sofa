@@ -22,7 +22,7 @@ export function AppTerminalPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-100">Terminal</h2>
+        <h2 className="text-lg font-semibold text-foreground">Terminal</h2>
         <div className="flex items-center gap-2">
           {connected ? (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400">

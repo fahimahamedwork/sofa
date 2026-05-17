@@ -47,7 +47,6 @@ function DialogTrigger({ children, asChild }: { children: React.ReactNode; asChi
 function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
   const { open, onOpenChange } = React.useContext(DialogContext);
 
-  // Handle escape key
   React.useEffect(() => {
     if (!open) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -57,7 +56,6 @@ function DialogContent({ children, className }: { children: React.ReactNode; cla
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onOpenChange]);
 
-  // Prevent body scroll when dialog is open
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -75,12 +73,12 @@ function DialogContent({ children, className }: { children: React.ReactNode; cla
       />
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-xl animate-in',
+          'relative z-50 w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-xl animate-in',
           className
         )}
       >
         <button
-          className="absolute right-4 top-4 rounded-sm text-zinc-400 opacity-70 hover:text-zinc-100 transition-opacity"
+          className="absolute right-4 top-4 rounded-sm text-muted-foreground opacity-70 hover:text-foreground transition-opacity"
           onClick={() => onOpenChange(false)}
         >
           <X className="h-4 w-4" />
@@ -99,13 +97,13 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 
 function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h2 className={cn('text-lg font-semibold text-zinc-50', className)} {...props} />
+    <h2 className={cn('text-lg font-semibold text-foreground', className)} {...props} />
   );
 }
 
 function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-zinc-400', className)} {...props} />
+    <p className={cn('text-sm text-muted-foreground', className)} {...props} />
   );
 }
 

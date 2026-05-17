@@ -25,12 +25,12 @@ function Breadcrumbs() {
   };
 
   if (segments.length === 0) {
-    return <span className="text-sm text-zinc-400">Dashboard</span>;
+    return <span className="text-sm text-muted-foreground">Dashboard</span>;
   }
 
   return (
     <div className="flex items-center gap-1 text-sm">
-      <Link to="/" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+      <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
         Dashboard
       </Link>
       {segments.map((segment, idx) => {
@@ -40,13 +40,13 @@ function Breadcrumbs() {
 
         return (
           <div key={path} className="flex items-center gap-1">
-            <ChevronRight className="h-3 w-3 text-zinc-600" />
+            <ChevronRight className="h-3 w-3 text-muted-foreground" />
             {isLast ? (
-              <span className="text-zinc-200 font-medium">{label}</span>
+              <span className="text-foreground font-medium">{label}</span>
             ) : (
               <button
                 onClick={() => navigate(path)}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {label}
               </button>
@@ -64,11 +64,11 @@ export function Header() {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-4 lg:px-6">
       {/* Mobile menu button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="rounded-md p-1.5 text-zinc-400 hover:text-zinc-200 lg:hidden"
+        className="rounded-md p-1.5 text-muted-foreground hover:text-foreground lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -81,10 +81,10 @@ export function Header() {
 
       {/* Search */}
       <div className="hidden md:flex items-center relative">
-        <Search className="absolute left-2.5 h-4 w-4 text-zinc-500" />
+        <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search..."
-          className="w-48 h-8 pl-8 text-xs bg-zinc-900 border-zinc-800"
+          className="w-48 h-8 pl-8 text-xs"
         />
       </div>
 
@@ -92,8 +92,8 @@ export function Header() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400',
-            'hover:bg-emerald-600/30 transition-colors text-sm font-semibold cursor-pointer'
+            'flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary',
+            'hover:bg-primary/30 transition-colors text-sm font-semibold cursor-pointer'
           )}>
             A
           </button>

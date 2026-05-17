@@ -17,7 +17,7 @@ export function AppListItem({ app, onStart, onStop, onRestart }: AppListItemProp
   const status = app.status || 'stopped';
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors group">
+    <div className="flex items-center gap-4 px-4 py-3 border-b border-border/50 hover:bg-muted/50 transition-colors group">
       {/* Status dot */}
       <div className={cn(
         'h-2.5 w-2.5 rounded-full shrink-0',
@@ -30,7 +30,7 @@ export function AppListItem({ app, onStart, onStop, onRestart }: AppListItemProp
       {/* App name */}
       <Link
         to={`/apps/${app.id}`}
-        className="text-sm font-medium text-zinc-100 hover:text-emerald-400 transition-colors min-w-0 truncate w-40"
+        className="text-sm font-medium text-foreground hover:text-emerald-400 transition-colors min-w-0 truncate w-40"
       >
         {app.name}
       </Link>
@@ -44,14 +44,14 @@ export function AppListItem({ app, onStart, onStop, onRestart }: AppListItemProp
       <StatusBadge status={status} />
 
       {/* Source */}
-      <span className="text-xs text-zinc-500 flex-1 truncate">
+      <span className="text-xs text-muted-foreground flex-1 truncate">
         {app.sourceUrl || 'N/A'}
       </span>
 
       {/* Actions */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="rounded-md p-1 text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button className="rounded-md p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreVertical className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>

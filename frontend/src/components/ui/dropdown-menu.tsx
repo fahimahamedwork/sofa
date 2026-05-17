@@ -67,7 +67,7 @@ function DropdownMenuContent({ children, className, align = 'end' }: { children:
     <div
       ref={ref}
       className={cn(
-        'absolute z-50 mt-1 min-w-[8rem] overflow-hidden rounded-md border border-zinc-800 bg-zinc-900 p-1 shadow-lg',
+        'absolute z-50 mt-1 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg animate-in',
         align === 'end' ? 'right-0' : 'left-0',
         className
       )}
@@ -83,7 +83,7 @@ function DropdownMenuItem({ children, className, onClick }: { children: React.Re
   return (
     <button
       className={cn(
-        'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-zinc-200 outline-none hover:bg-zinc-800 hover:text-zinc-100 transition-colors',
+        'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm text-popover-foreground outline-none hover:bg-muted hover:text-foreground transition-colors',
         className
       )}
       onClick={() => {
@@ -97,12 +97,12 @@ function DropdownMenuItem({ children, className, onClick }: { children: React.Re
 }
 
 function DropdownMenuSeparator({ className }: { className?: string }) {
-  return <div className={cn('-mx-1 my-1 h-px bg-zinc-800', className)} />;
+  return <div className={cn('-mx-1 my-1 h-px bg-border', className)} />;
 }
 
 function DropdownMenuLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn('px-2 py-1.5 text-xs font-medium text-zinc-500', className)}>
+    <div className={cn('px-2 py-1.5 text-xs font-medium text-muted-foreground', className)}>
       {children}
     </div>
   );

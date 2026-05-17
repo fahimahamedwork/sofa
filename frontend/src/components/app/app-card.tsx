@@ -18,7 +18,7 @@ export function AppCard({ app, onStart, onStop, onRestart }: AppCardProps) {
   const status = app.status || 'stopped';
 
   return (
-    <Card className="group hover:border-zinc-700 transition-colors">
+    <Card className="group hover:border-border transition-colors">
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3 min-w-0">
@@ -32,7 +32,7 @@ export function AppCard({ app, onStart, onStop, onRestart }: AppCardProps) {
             <div className="min-w-0">
               <Link
                 to={`/apps/${app.id}`}
-                className="text-sm font-semibold text-zinc-100 hover:text-emerald-400 transition-colors truncate block"
+                className="text-sm font-semibold text-foreground hover:text-emerald-400 transition-colors truncate block"
               >
                 {app.name}
               </Link>
@@ -46,7 +46,7 @@ export function AppCard({ app, onStart, onStop, onRestart }: AppCardProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="rounded-md p-1 text-zinc-500 hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button className="rounded-md p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                 <MoreVertical className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
@@ -66,7 +66,7 @@ export function AppCard({ app, onStart, onStop, onRestart }: AppCardProps) {
 
         <div className="mt-3 flex items-center justify-between">
           <StatusBadge status={status} />
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-muted-foreground">
             {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'Never deployed'}
           </span>
         </div>

@@ -21,8 +21,8 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-50">Settings</h1>
-        <p className="text-sm text-zinc-400 mt-1">Manage server and security settings</p>
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage server and security settings</p>
       </div>
 
       <Tabs defaultValue="server">
@@ -58,7 +58,7 @@ function ServerTab({ stats, isLoading }: { stats: ReturnType<typeof useServerSta
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Server className="h-4 w-4 text-zinc-400" /> Server Information
+            <Server className="h-4 w-4 text-muted-foreground" /> Server Information
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -72,7 +72,7 @@ function ServerTab({ stats, isLoading }: { stats: ReturnType<typeof useServerSta
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <HardDrive className="h-4 w-4 text-zinc-400" /> Disk Information
+            <HardDrive className="h-4 w-4 text-muted-foreground" /> Disk Information
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -146,21 +146,21 @@ function SecurityTab() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="h-4 w-4 text-zinc-400" /> Change Password
+            <Shield className="h-4 w-4 text-muted-foreground" /> Change Password
           </CardTitle>
           <CardDescription>Update your admin password</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Current Password</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Current Password</label>
             <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">New Password</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">New Password</label>
             <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Confirm New Password</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Confirm New Password</label>
             <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
           </div>
           <Button onClick={handlePasswordChange} disabled={!currentPassword || !newPassword || !confirmPassword}>
@@ -172,15 +172,15 @@ function SecurityTab() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="h-4 w-4 text-zinc-400" /> IP Whitelist
+            <Shield className="h-4 w-4 text-muted-foreground" /> IP Whitelist
           </CardTitle>
           <CardDescription>Restrict panel access to specific IP addresses</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Allowed IPs (one per line)</label>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">Allowed IPs (one per line)</label>
             <textarea
-              className="flex min-h-[80px] w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               placeholder="192.168.1.0/24&#10;10.0.0.1"
               value={ipWhitelist}
               onChange={(e) => setIpWhitelist(e.target.value)}
@@ -242,7 +242,7 @@ function SSHTab() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-medium text-zinc-100">SSH Keys</h3>
+        <h3 className="text-base font-medium text-foreground">SSH Keys</h3>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -255,13 +255,13 @@ function SSHTab() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Name</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Name</label>
                 <Input placeholder="My Laptop" value={keyName} onChange={(e) => setKeyName(e.target.value)} />
               </div>
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Public Key</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Public Key</label>
                 <textarea
-                  className="flex min-h-[100px] w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-50 font-mono placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="flex min-h-[100px] w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   placeholder="ssh-rsa AAAA..."
                   value={publicKey}
                   onChange={(e) => setPublicKey(e.target.value)}
@@ -283,8 +283,8 @@ function SSHTab() {
       ) : !sshKeys || sshKeys.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <Key className="h-8 w-8 text-zinc-600 mx-auto mb-2" />
-            <p className="text-sm text-zinc-500">No SSH keys added</p>
+            <Key className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No SSH keys added</p>
           </CardContent>
         </Card>
       ) : (
@@ -293,10 +293,10 @@ function SSHTab() {
             <Card key={key.id} className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Key className="h-4 w-4 text-zinc-400 shrink-0" />
+                  <Key className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-200">{key.name}</p>
-                    <p className="text-xs text-zinc-500 font-mono truncate">{key.fingerprint}</p>
+                    <p className="text-sm font-medium text-foreground">{key.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono truncate">{key.fingerprint}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -320,8 +320,8 @@ function SSHTab() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between text-sm py-1">
-      <span className="text-zinc-400">{label}</span>
-      <span className="text-zinc-200 font-mono text-xs">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-foreground font-mono text-xs">{value}</span>
     </div>
   );
 }

@@ -15,7 +15,7 @@ interface DomainCardProps {
 const sslIcons: Record<string, { icon: typeof Shield; color: string }> = {
   active: { icon: ShieldCheck, color: 'text-emerald-400' },
   pending: { icon: Shield, color: 'text-amber-400' },
-  none: { icon: Shield, color: 'text-zinc-500' },
+  none: { icon: Shield, color: 'text-muted-foreground' },
   error: { icon: ShieldAlert, color: 'text-red-400' },
 };
 
@@ -30,11 +30,11 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
           <div className="mt-0.5">
-            <Globe className="h-5 w-5 text-zinc-400" />
+            <Globe className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-zinc-100 truncate">{hostname}</span>
+              <span className="text-sm font-medium text-foreground truncate">{hostname}</span>
               {domain.type === 'primary' && (
                 <Badge variant="running" className="text-[10px]">Primary</Badge>
               )}
@@ -47,8 +47,8 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
                 </span>
               </div>
             </div>
-            <div className="mt-2 rounded-md bg-zinc-800/50 p-2.5 text-xs text-zinc-400">
-              <p className="font-medium text-zinc-300 mb-1">DNS Configuration</p>
+            <div className="mt-2 rounded-md bg-muted/50 p-2.5 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">DNS Configuration</p>
               <p>Add a CNAME record pointing <code className="text-emerald-400">{hostname}</code> to your server.</p>
               {onVerify && (
                 <Button variant="outline" size="sm" className="mt-2 h-7 text-xs" onClick={() => onVerify(domain.id)}>
@@ -69,7 +69,7 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
             href={`https://${hostname}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-md p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="rounded-md p-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
           </a>

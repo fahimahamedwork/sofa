@@ -56,7 +56,7 @@ export function AppDomainsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-100">Domains</h2>
+        <h2 className="text-lg font-semibold text-foreground">Domains</h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
@@ -69,7 +69,7 @@ export function AppDomainsPage() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Hostname</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Hostname</label>
                 <Input
                   placeholder="example.com"
                   value={hostname}
@@ -77,7 +77,7 @@ export function AppDomainsPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Type</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">Type</label>
                 <div className="flex gap-2">
                   {(['primary', 'custom', 'subdomain'] as const).map((type) => (
                     <button
@@ -86,7 +86,7 @@ export function AppDomainsPage() {
                       className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                         domainType === type
                           ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-600'
-                          : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:text-zinc-200'
+                          : 'bg-muted text-muted-foreground border border-border hover:text-foreground'
                       }`}
                     >
                       {type}
@@ -94,8 +94,8 @@ export function AppDomainsPage() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-md bg-zinc-800/50 p-3 text-xs text-zinc-400">
-                <p className="font-medium text-zinc-300 mb-1">DNS Configuration</p>
+              <div className="rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">DNS Configuration</p>
                 <p>After adding the domain, create a CNAME or A record pointing to your server.</p>
               </div>
             </div>
@@ -114,7 +114,7 @@ export function AppDomainsPage() {
       ) : !domains || domains.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-sm text-zinc-500">No domains configured</p>
+            <p className="text-sm text-muted-foreground">No domains configured</p>
           </CardContent>
         </Card>
       ) : (

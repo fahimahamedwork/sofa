@@ -7,6 +7,9 @@ import {
   metricsApi,
 } from '@/lib/api';
 import type {
+  App,
+  Deployment,
+  AppMetrics,
   CreateAppRequest,
   UpdateAppRequest,
   AddDomainRequest,
@@ -21,13 +24,13 @@ export function useApps() {
       const { data } = await appsApi.listApps();
       // Backend returns {apps: [...], total, page, page_size} - extract the apps array
       if (data && typeof data === 'object' && 'apps' in data) {
-        return (data as { apps: unknown[] }).apps;
+        return (data as { apps: App[] }).apps;
       }
       // Fallback: if data is already an array
       if (Array.isArray(data)) {
-        return data;
+        return data as App[];
       }
-      return [];
+      return [] as App[];
     },
   });
 }
@@ -153,12 +156,12 @@ export function useDeployments(slug: string) {
       const { data } = await deploymentsApi.listDeployments(slug);
       // Backend returns {deployments: [...], total, page, page_size}
       if (data && typeof data === 'object' && 'deployments' in data) {
-        return (data as { deployments: unknown[] }).deployments;
+        return (data as { deployments: Deployment[] }).deployments;
       }
       if (Array.isArray(data)) {
-        return data;
+        return data as Deployment[];
       }
-      return [];
+      return [] as Deployment[];
     },
     enabled: !!slug,
   });
@@ -316,9 +319,9 @@ export function useAppMetrics(slug: string) {
       const { data } = await metricsApi.getAppMetrics(slug);
       // Backend returns {app_id, app_name, status, metrics: {...}}
       if (data && typeof data === 'object' && 'metrics' in data) {
-        return (data as { metrics: unknown }).metrics;
+        return (data as { metrics: AppMetrics }).metrics;
       }
-      return data;
+      return data as AppMetrics | undefined;
     },
     enabled: !!slug,
     refetchInterval: 10000,

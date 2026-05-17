@@ -90,8 +90,11 @@ export const envVarsApi = {
 // Domains
 export const domainsApi = {
   listDomains: (slug: string) => api.get<Domain[]>(`/apps/${slug}/domains`),
+  listAllDomains: () => api.get<Domain[]>('/domains'),
   addDomain: (slug: string, data: AddDomainRequest) => api.post<Domain>(`/apps/${slug}/domains`, data),
   removeDomain: (slug: string, id: string) => api.delete(`/domains/${id}`),
+  verifyDomain: (slug: string, id: string) => api.post(`/apps/${slug}/domains/${id}/verify`),
+  setPrimary: (slug: string, id: string) => api.post(`/apps/${slug}/domains/${id}/set-primary`),
 };
 
 // Databases

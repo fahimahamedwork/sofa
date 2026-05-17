@@ -19,7 +19,7 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(password);
+      await login(username, password);
       navigate('/');
     } catch {
       toast.error('Invalid credentials');

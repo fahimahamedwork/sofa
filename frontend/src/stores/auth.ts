@@ -5,7 +5,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   init: () => Promise<void>;
 }
@@ -15,8 +15,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
 
-  login: async (password: string) => {
-    const { data } = await authApi.login({ username: 'admin', password });
+  login: async (username: string, password: string) => {
+    const { data } = await authApi.login({ username, password });
     // Response interceptor unwraps {success, data} envelope
     const token = data.token;
     localStorage.setItem('sofa_token', token);

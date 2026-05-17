@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const dbTypeColors: Record<DatabaseType, string> = {
-  postgresql: 'bg-sky-500/10 text-sky-400',
+  postgres: 'bg-sky-500/10 text-sky-400',
   mysql: 'bg-blue-500/10 text-blue-400',
   redis: 'bg-red-500/10 text-red-400',
   mongodb: 'bg-emerald-500/10 text-emerald-400',
@@ -44,7 +44,7 @@ export function DatabasesPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dbType, setDbType] = useState<DatabaseType>('postgresql');
+  const [dbType, setDbType] = useState<DatabaseType>('postgres');
   const [connectionString, setConnectionString] = useState('');
 
   const createDB = useMutation({
@@ -84,7 +84,7 @@ export function DatabasesPage() {
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Type</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {(['postgresql', 'mysql', 'redis', 'mongodb'] as DatabaseType[]).map((type) => (
+                  {(['postgres', 'mysql', 'redis', 'mongodb'] as DatabaseType[]).map((type) => (
                     <button
                       key={type}
                       onClick={() => setDbType(type)}

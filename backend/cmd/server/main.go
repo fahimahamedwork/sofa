@@ -76,17 +76,7 @@ func main() {
         settingRepo := repository.NewSettingRepo(db)
         sshKeyRepo := repository.NewSSHKeyRepo(db)
 
-        // Initialize services
-        appService := service.NewAppService(appRepo, deployRepo, envVarRepo, domainRepo, volumeRepo, databaseRepo, cronJobRepo)
-        deployService := service.NewDeployService(deployRepo, appRepo, pipeline, queueClient, hub)
-        envVarService := service.NewEnvVarService(envVarRepo, encryptor)
-        domainService := service.NewDomainService(domainRepo, appRepo, cfg.Traefik.BaseDomain)
-        databaseService := service.NewDatabaseService(databaseRepo, encryptor)
-        settingService := service.NewSettingService(settingRepo)
-        volumeService := service.NewVolumeService(volumeRepo)
-        sshKeyService := service.NewSSHKeyService(sshKeyRepo)
-
-        // Initialize WebSocket hub
+        // Initialize WebSocket hub (must be before pipeline and deploy service)
         hub := realtime.NewHub()
         go hub.Run()
 
@@ -94,14 +84,14 @@ func main() {
         traefikManager := proxy.NewTraefikManager(cfg.Traefik.APIURL, cfg.Traefik.BaseDomain)
         _ = traefikManager // Used by deploy pipeline and domain service
 
-        // Initialize Docker client
+        // Initialize Docker client (must be before pipeline)
         var dockerClient *docker.DockerClient
         dockerClient, err = docker.NewDockerClient(cfg.Docker.SocketPath)
         if err != nil {
                 zapLogger.Warn("Docker daemon not available, deploy functionality disabled", zap.Error(err))
         }
 
-        // Initialize deploy pipeline
+        // Initialize deploy pipeline (depends on dockerClient, repos, hub, encryptor)
         var pipeline *deploy.Pipeline
         if dockerClient != nil {
                 pipeline = deploy.NewPipeline(dockerClient, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
@@ -109,7 +99,7 @@ func main() {
                 pipeline = deploy.NewPipeline(nil, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
         }
 
-        // Try to initialize asynq queue client
+        // Try to initialize asynq queue client (depends on Redis)
         queueClient, qerr := queue.NewClient(
                 cfg.Redis.Addr(),
                 cfg.Redis.Password,
@@ -122,7 +112,7 @@ func main() {
                 defer queueClient.Close()
         }
 
-        // Try to initialize asynq worker
+        // Try to initialize asynq worker (depends on pipeline, repos, hub)
         worker := queue.NewWorker(
                 cfg.Redis.Addr(),
                 cfg.Redis.Password,
@@ -140,6 +130,16 @@ func main() {
                         zapLogger.Warn("Worker failed to start", zap.Error(err))
                 }
         }()
+
+        // Initialize services (depends on repos, pipeline, queueClient, hub)
+        appService := service.NewAppService(appRepo, deployRepo, envVarRepo, domainRepo, volumeRepo, databaseRepo, cronJobRepo)
+        deployService := service.NewDeployService(deployRepo, appRepo, pipeline, queueClient, hub)
+        envVarService := service.NewEnvVarService(envVarRepo, encryptor)
+        domainService := service.NewDomainService(domainRepo, appRepo, cfg.Traefik.BaseDomain)
+        databaseService := service.NewDatabaseService(databaseRepo, encryptor)
+        settingService := service.NewSettingService(settingRepo)
+        volumeService := service.NewVolumeService(volumeRepo)
+        sshKeyService := service.NewSSHKeyService(sshKeyRepo)
 
         // Initialize handlers
         authHandler := handler.NewAuthHandler(cfg, settingService)

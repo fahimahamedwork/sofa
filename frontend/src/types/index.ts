@@ -1,9 +1,9 @@
 export type AppStatus = 'running' | 'stopped' | 'building' | 'deploying' | 'error' | 'queued' | 'healthy' | 'failed';
-export type DeploymentStatus = 'queued' | 'building' | 'deploying' | 'success' | 'failed' | 'cancelled';
+export type DeploymentStatus = 'queued' | 'building' | 'deploying' | 'healthy' | 'failed' | 'cancelled';
 export type SourceType = 'git' | 'docker_image' | 'dockerfile';
 export type DomainSSLStatus = 'active' | 'pending' | 'none' | 'error';
 export type DomainType = 'primary' | 'custom' | 'subdomain';
-export type DatabaseType = 'postgresql' | 'mysql' | 'redis' | 'mongodb';
+export type DatabaseType = 'postgres' | 'mysql' | 'redis' | 'mongodb';
 export type DatabaseStatus = 'running' | 'stopped' | 'provisioning';
 
 // Frontend App type (camelCase - snakeToCamel converter handles the mapping)

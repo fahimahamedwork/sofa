@@ -73,7 +73,7 @@ export function AppDeploymentsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {(deployment.status === 'failed' || deployment.status === 'success') && (
+                  {(deployment.status === 'failed' || deployment.status === 'healthy') && (
                     <Button
                       variant="ghost"
                       size="sm"

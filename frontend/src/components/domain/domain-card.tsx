@@ -19,16 +19,11 @@ const sslIcons: Record<string, { icon: typeof Shield; color: string }> = {
   error: { icon: ShieldAlert, color: 'text-red-400' },
 };
 
-const sslLabels: Record<string, string> = {
-  active: 'SSL Active',
-  pending: 'SSL Pending',
-  none: 'No SSL',
-  error: 'SSL Error',
-};
-
 export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainCardProps) {
-  const sslIcon = sslIcons[domain.sslStatus] || sslIcons.none;
+  const sslStatus = domain.sslEnabled ? 'active' : 'none';
+  const sslIcon = sslIcons[sslStatus] || sslIcons.none;
   const SslIcon = sslIcon.icon;
+  const hostname = domain.domain;
 
   return (
     <Card className="p-4">
@@ -39,7 +34,7 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-zinc-100 truncate">{domain.hostname}</span>
+              <span className="text-sm font-medium text-zinc-100 truncate">{hostname}</span>
               {domain.type === 'primary' && (
                 <Badge variant="running" className="text-[10px]">Primary</Badge>
               )}
@@ -47,23 +42,20 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
             <div className="flex items-center gap-3 mt-1.5">
               <div className="flex items-center gap-1.5">
                 <SslIcon className={cn('h-3.5 w-3.5', sslIcon.color)} />
-                <span className={cn('text-xs', sslIcon.color)}>{sslLabels[domain.sslStatus]}</span>
+                <span className={cn('text-xs', sslIcon.color)}>
+                  {domain.sslEnabled ? 'SSL Active' : 'No SSL'}
+                </span>
               </div>
-              <Badge variant={domain.verified ? 'running' : 'outline'} className="text-[10px]">
-                {domain.verified ? 'Verified' : 'Unverified'}
-              </Badge>
             </div>
-            {!domain.verified && (
-              <div className="mt-2 rounded-md bg-zinc-800/50 p-2.5 text-xs text-zinc-400">
-                <p className="font-medium text-zinc-300 mb-1">DNS Configuration</p>
-                <p>Add a CNAME record pointing <code className="text-emerald-400">{domain.hostname}</code> to your server.</p>
-                {onVerify && (
-                  <Button variant="outline" size="sm" className="mt-2 h-7 text-xs" onClick={() => onVerify(domain.id)}>
-                    Verify DNS
-                  </Button>
-                )}
-              </div>
-            )}
+            <div className="mt-2 rounded-md bg-zinc-800/50 p-2.5 text-xs text-zinc-400">
+              <p className="font-medium text-zinc-300 mb-1">DNS Configuration</p>
+              <p>Add a CNAME record pointing <code className="text-emerald-400">{hostname}</code> to your server.</p>
+              {onVerify && (
+                <Button variant="outline" size="sm" className="mt-2 h-7 text-xs" onClick={() => onVerify(domain.id)}>
+                  Verify DNS
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -74,7 +66,7 @@ export function DomainCard({ domain, onRemove, onSetPrimary, onVerify }: DomainC
             </Button>
           )}
           <a
-            href={`https://${domain.hostname}`}
+            href={`https://${hostname}`}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-md p-1.5 text-zinc-500 hover:text-zinc-300 transition-colors"

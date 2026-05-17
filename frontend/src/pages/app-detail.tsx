@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/app/status-badge';
 import { ResourceBar } from '@/components/dashboard/resource-bar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useApp, useAppMetrics, useStartApp, useStopApp, useRestartApp, useCreateDeployment } from '@/hooks/useApp';
-import { cn, formatDateRelative, formatBytes, truncateCommit } from '@/lib/utils';
+import { useApp, useAppMetrics, useStartApp, useStopApp, useRestartApp, useCreateDeployment, useAppDomains } from '@/hooks/useApp';
+import { cn, formatDateRelative, formatBytes } from '@/lib/utils';
+import type { AppStatus } from '@/types';
 
 const subNav = [
   { path: '', label: 'Overview' },
@@ -20,14 +21,15 @@ const subNav = [
 ];
 
 export function AppDetailPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const { data: app, isLoading } = useApp(slug!);
-  const { data: metrics } = useAppMetrics(slug!);
+  const { data: app, isLoading } = useApp(id);
+  const { data: metrics } = useAppMetrics(id!);
+  const { data: domains } = useAppDomains(id!);
   const startApp = useStartApp();
   const stopApp = useStopApp();
   const restartApp = useRestartApp();
-  const createDeployment = useCreateDeployment(slug!);
+  const createDeployment = useCreateDeployment(id!);
 
   if (isLoading) {
     return (
@@ -49,7 +51,8 @@ export function AppDetailPage() {
     );
   }
 
-  const basePath = `/apps/${slug}`;
+  const basePath = `/apps/${id}`;
+  const status = (app.status || 'stopped') as AppStatus;
 
   return (
     <div className="space-y-6">
@@ -59,42 +62,35 @@ export function AppDetailPage() {
           <div className="flex items-center gap-3">
             <div className={cn(
               'h-3 w-3 rounded-full',
-              app.status === 'running' ? 'bg-emerald-500' :
-              app.status === 'building' ? 'bg-amber-500 animate-pulse-subtle' :
+              status === 'running' ? 'bg-emerald-500' :
+              status === 'building' ? 'bg-amber-500 animate-pulse-subtle' :
               'bg-zinc-500'
             )} />
             <h1 className="text-2xl font-bold text-zinc-50">{app.name}</h1>
-            <StatusBadge status={app.status} />
+            <StatusBadge status={status} />
           </div>
           <p className="text-sm text-zinc-400 mt-1">
-            {app.framework} &middot; Port {app.port} &middot; Deployed {app.lastDeployAt ? formatDateRelative(app.lastDeployAt) : 'never'}
+            {app.framework || 'N/A'} &middot; Port {app.port || 'N/A'} &middot; {app.sourceType}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {app.url && (
-            <a href={app.url} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <ExternalLink className="h-3.5 w-3.5 mr-1" /> Visit
-              </Button>
-            </a>
-          )}
           <Button variant="outline" size="sm" onClick={() => createDeployment.mutate()}>
             <Rocket className="h-3.5 w-3.5 mr-1" /> Redeploy
           </Button>
-          <Button variant="outline" size="sm" onClick={() => startApp.mutate(slug!)} disabled={app.status === 'running'}>
+          <Button variant="outline" size="sm" onClick={() => startApp.mutate(id!)} disabled={status === 'running'}>
             <Play className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => stopApp.mutate(slug!)} disabled={app.status === 'stopped'}>
+          <Button variant="outline" size="sm" onClick={() => stopApp.mutate(id!)} disabled={status === 'stopped'}>
             <Square className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => restartApp.mutate(slug!)}>
+          <Button variant="outline" size="sm" onClick={() => restartApp.mutate(id!)}>
             <RotateCcw className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       {/* Sub-navigation */}
-      <div className="flex items-center gap-1 border-b border-zinc-800 -mb-6 pb-0">
+      <div className="flex items-center gap-1 border-b border-zinc-800 -mb-6 pb-0 overflow-x-auto">
         {subNav.map((item) => {
           const fullPath = item.path ? `${basePath}${item.path}` : basePath;
           const isActive = location.pathname === fullPath;
@@ -104,7 +100,7 @@ export function AppDetailPage() {
               key={item.path}
               to={fullPath}
               className={cn(
-                'px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
+                'px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
                 isActive
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200'
@@ -127,7 +123,7 @@ export function AppDetailPage() {
             <CardContent className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Status</span>
-                <StatusBadge status={app.status} />
+                <StatusBadge status={status} />
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Framework</span>
@@ -138,15 +134,19 @@ export function AppDetailPage() {
                 <Badge variant="secondary" className="text-[10px]">{app.sourceType}</Badge>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Port</span>
-                <span className="text-zinc-200">{app.port}</span>
+                <span className="text-zinc-400">Source URL</span>
+                <span className="text-zinc-200 font-mono text-xs truncate max-w-[200px]">{app.sourceUrl || 'N/A'}</span>
               </div>
-              {app.lastDeployCommit && (
+              {app.branch && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Last Commit</span>
-                  <span className="text-zinc-200 font-mono text-xs">{truncateCommit(app.lastDeployCommit)}</span>
+                  <span className="text-zinc-400">Branch</span>
+                  <span className="text-zinc-200 font-mono text-xs">{app.branch}</span>
                 </div>
               )}
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-400">Port</span>
+                <span className="text-zinc-200">{app.port || 'N/A'}</span>
+              </div>
             </CardContent>
           </Card>
 
@@ -162,8 +162,8 @@ export function AppDetailPage() {
               />
               <ResourceBar
                 label="Memory"
-                value={metrics ? (metrics.memoryUsage / metrics.memoryLimit) * 100 : 0}
-                detail={`${formatBytes(metrics?.memoryUsage ?? 0)} / ${formatBytes(metrics?.memoryLimit ?? 0)}`}
+                value={metrics?.memoryUsage ?? 0}
+                detail={formatBytes(metrics?.memoryUsage ?? 0)}
               />
               <ResourceBar
                 label="Network In"
@@ -180,24 +180,24 @@ export function AppDetailPage() {
         </div>
 
         {/* Domains */}
-        {app.domains && app.domains.length > 0 && (
+        {domains && domains.length > 0 && (
           <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-base">Domains</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {app.domains.map((domain) => (
+                {domains.map((domain) => (
                   <div key={domain.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-zinc-200">{domain.hostname}</span>
+                      <span className="text-zinc-200">{domain.domain}</span>
                       {domain.type === 'primary' && (
                         <Badge variant="running" className="text-[10px]">Primary</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={domain.sslStatus === 'active' ? 'running' : 'outline'} className="text-[10px]">
-                        {domain.sslStatus === 'active' ? 'SSL' : 'No SSL'}
+                      <Badge variant={domain.sslEnabled ? 'running' : 'outline'} className="text-[10px]">
+                        {domain.sslEnabled ? 'SSL' : 'No SSL'}
                       </Badge>
                     </div>
                   </div>

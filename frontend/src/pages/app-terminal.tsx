@@ -3,13 +3,21 @@ import { WebTerminal } from '@/components/terminal/web-terminal';
 import { Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { socketManager } from '@/lib/socket';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function AppTerminalPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const [connected, setConnected] = useState(socketManager.connected);
 
-  if (!slug) return null;
+  // Poll connection state
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setConnected(socketManager.connected);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!id) return null;
 
   return (
     <div className="space-y-4">
@@ -43,7 +51,7 @@ export function AppTerminalPage() {
           </Button>
         </div>
       </div>
-      <WebTerminal appId={slug} />
+      <WebTerminal appId={id} />
     </div>
   );
 }

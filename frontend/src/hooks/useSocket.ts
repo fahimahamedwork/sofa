@@ -1,13 +1,21 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { socketManager } from '@/lib/socket';
 
 export function useSocket(event?: string, handler?: (...args: unknown[]) => void) {
   const handlerRef = useRef(handler);
   handlerRef.current = handler;
+  const [connected, setConnected] = useState(socketManager.connected);
 
   useEffect(() => {
     const token = localStorage.getItem('sofa_token');
     socketManager.connect(token || undefined);
+
+    // Poll connection state
+    const interval = setInterval(() => {
+      setConnected(socketManager.connected);
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -37,7 +45,7 @@ export function useSocket(event?: string, handler?: (...args: unknown[]) => void
   }, []);
 
   return {
-    connected: socketManager.connected,
+    connected,
     joinRoom,
     leaveRoom,
     emit,

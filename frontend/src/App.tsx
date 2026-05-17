@@ -21,6 +21,7 @@ import { AppSettingsPage } from '@/pages/app-settings';
 import { DomainsPage } from '@/pages/domains';
 import { DatabasesPage } from '@/pages/databases';
 import { SettingsPage } from '@/pages/settings';
+import { NotFoundPage } from '@/pages/not-found';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,18 +69,18 @@ function AppRoutes() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/apps" element={<AppsPage />} />
         <Route path="/apps/new" element={<DeployPage />} />
-        <Route path="/apps/:slug" element={<AppDetailPage />} />
-        <Route path="/apps/:slug/deployments" element={<AppDeploymentsPage />} />
-        <Route path="/apps/:slug/env" element={<AppEnvPage />} />
-        <Route path="/apps/:slug/domains" element={<AppDomainsPage />} />
-        <Route path="/apps/:slug/logs" element={<AppLogsPage />} />
-        <Route path="/apps/:slug/terminal" element={<AppTerminalPage />} />
-        <Route path="/apps/:slug/settings" element={<AppSettingsPage />} />
+        <Route path="/apps/:id" element={<AppDetailPage />} />
+        <Route path="/apps/:id/deployments" element={<AppDeploymentsPage />} />
+        <Route path="/apps/:id/env" element={<AppEnvPage />} />
+        <Route path="/apps/:id/domains" element={<AppDomainsPage />} />
+        <Route path="/apps/:id/logs" element={<AppLogsPage />} />
+        <Route path="/apps/:id/terminal" element={<AppTerminalPage />} />
+        <Route path="/apps/:id/settings" element={<AppSettingsPage />} />
         <Route path="/domains" element={<DomainsPage />} />
         <Route path="/databases" element={<DatabasesPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

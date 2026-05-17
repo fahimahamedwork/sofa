@@ -64,15 +64,21 @@ export function WebTerminal({ appId, className }: WebTerminalProps) {
     xtermRef.current = xterm;
     fitRef.current = fitAddon;
 
-    // Handle terminal input
+    // Handle terminal input - send as raw WebSocket message
     xterm.onData((data) => {
-      socketManager.emit('terminal:input', { appId, data });
+      socketManager.send({
+        action: 'terminal:input',
+        room: `app:${appId}:terminal`,
+        data: data,
+      });
     });
 
-    // Handle terminal output
-    const handleOutput = (data: unknown) => {
-      const output = data as { data: string };
-      xterm.write(output.data);
+    // Handle terminal output from room listener
+    const handleOutput = (message: unknown) => {
+      const msg = message as { data?: string };
+      if (msg.data) {
+        xterm.write(msg.data);
+      }
     };
     socketManager.on(`app:${appId}:terminal:output`, handleOutput);
 

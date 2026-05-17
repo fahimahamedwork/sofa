@@ -33,6 +33,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -51,10 +52,18 @@ body {
   background: #52525b;
 }
 
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+
+/* xterm terminal */
 .xterm {
   padding: 8px;
 }
 
+/* Custom animations */
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -62,4 +71,52 @@ body {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Dialog animations (replaces tailwindcss-animate) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn95 {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes zoomOut95 {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+.animate-in {
+  animation: fadeIn 150ms ease-out, zoomIn95 150ms ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 150ms ease-out;
+}
+
+.zoom-in-95 {
+  animation: zoomIn95 150ms ease-out;
+}
+
+/* Overlay fade */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dialog-overlay-animate {
+  animation: overlayFadeIn 150ms ease-out;
+}
+
+/* Ensure full height layout */
+#root {
+  min-height: 100vh;
 }

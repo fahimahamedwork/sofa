@@ -1,20 +1,20 @@
 import { useParams } from 'react-router-dom';
 import { ChevronDown, ChevronRight, RotateCcw, Rocket } from 'lucide-react';
 import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/app/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeployments, useRollback, useCreateDeployment } from '@/hooks/useApp';
-import { formatDateRelative, truncateCommit, formatDuration } from '@/lib/utils';
+import { formatDateRelative, formatDuration } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 export function AppDeploymentsPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: deployments, isLoading } = useDeployments(slug!);
-  const rollback = useRollback(slug!);
-  const createDeployment = useCreateDeployment(slug!);
+  const { id } = useParams<{ id: string }>();
+  const { data: deployments, isLoading } = useDeployments(id!);
+  const rollback = useRollback(id!);
+  const createDeployment = useCreateDeployment(id!);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (isLoading) {
@@ -53,8 +53,8 @@ export function AppDeploymentsPage() {
                 <StatusBadge status={deployment.status} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    {deployment.commit && (
-                      <span className="text-xs font-mono text-zinc-400">{truncateCommit(deployment.commit)}</span>
+                    {deployment.commitHash && (
+                      <span className="text-xs font-mono text-zinc-400">{deployment.commitHash.substring(0, 7)}</span>
                     )}
                     {deployment.commitMessage && (
                       <span className="text-sm text-zinc-300 truncate">{deployment.commitMessage}</span>
@@ -93,11 +93,11 @@ export function AppDeploymentsPage() {
                 </div>
               </button>
 
-              {expandedId === deployment.id && deployment.logs && (
+              {expandedId === deployment.id && deployment.buildLog && (
                 <div className="border-t border-zinc-800">
                   <ScrollArea className="max-h-64">
                     <pre className="p-4 text-xs font-mono text-zinc-300 bg-zinc-950 whitespace-pre-wrap">
-                      {deployment.logs}
+                      {deployment.buildLog}
                     </pre>
                   </ScrollArea>
                 </div>

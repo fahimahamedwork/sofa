@@ -47,17 +47,35 @@ function DialogTrigger({ children, asChild }: { children: React.ReactNode; asChi
 function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
   const { open, onOpenChange } = React.useContext(DialogContext);
 
+  // Handle escape key
+  React.useEffect(() => {
+    if (!open) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open, onOpenChange]);
+
+  // Prevent body scroll when dialog is open
+  React.useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm dialog-overlay-animate"
         onClick={() => onOpenChange(false)}
       />
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-xl animate-in fade-in zoom-in-95',
+          'relative z-50 w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-xl animate-in',
           className
         )}
       >

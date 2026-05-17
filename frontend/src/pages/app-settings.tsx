@@ -11,28 +11,26 @@ import { useApp, useUpdateApp, useDeleteApp } from '@/hooks/useApp';
 import { toast } from 'sonner';
 
 export function AppSettingsPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: app, isLoading } = useApp(slug!);
-  const updateApp = useUpdateApp(slug!);
+  const { data: app, isLoading } = useApp(id);
+  const updateApp = useUpdateApp(id!);
   const deleteApp = useDeleteApp();
   const [deleteConfirm, setDeleteConfirm] = useState('');
 
   // Form state
   const [name, setName] = useState('');
   const [port, setPort] = useState('');
-  const [buildCommand, setBuildCommand] = useState('');
-  const [startCommand, setStartCommand] = useState('');
+  const [buildCmd, setBuildCmd] = useState('');
   const [memoryLimit, setMemoryLimit] = useState('');
   const [cpuLimit, setCpuLimit] = useState('');
 
-  // Initialize form when app loads (using useEffect instead of render-time setState)
+  // Initialize form when app loads
   useEffect(() => {
     if (app) {
       setName(app.name || '');
       setPort(String(app.port || ''));
-      setBuildCommand(app.buildCommand || '');
-      setStartCommand(app.startCommand || '');
+      setBuildCmd(app.buildCmd || '');
       setMemoryLimit(String(app.memoryLimit || ''));
       setCpuLimit(String(app.cpuLimit || ''));
     }
@@ -42,8 +40,7 @@ export function AppSettingsPage() {
     updateApp.mutate({
       name: name || undefined,
       port: port ? parseInt(port) : undefined,
-      buildCommand: buildCommand || undefined,
-      startCommand: startCommand || undefined,
+      buildCmd: buildCmd || undefined,
       memoryLimit: memoryLimit ? parseInt(memoryLimit) : undefined,
       cpuLimit: cpuLimit ? parseFloat(cpuLimit) : undefined,
     });
@@ -51,7 +48,7 @@ export function AppSettingsPage() {
 
   const handleDelete = () => {
     if (deleteConfirm !== app?.name) return;
-    deleteApp.mutate(slug!, {
+    deleteApp.mutate(id!, {
       onSuccess: () => {
         navigate('/apps');
       },
@@ -94,11 +91,7 @@ export function AppSettingsPage() {
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Build Command</label>
-            <Input value={buildCommand} onChange={(e) => setBuildCommand(e.target.value)} placeholder="npm run build" />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Start Command</label>
-            <Input value={startCommand} onChange={(e) => setStartCommand(e.target.value)} placeholder="npm start" />
+            <Input value={buildCmd} onChange={(e) => setBuildCmd(e.target.value)} placeholder="npm run build" />
           </div>
           <Button onClick={handleSave} disabled={updateApp.isPending}>
             {updateApp.isPending ? 'Saving...' : 'Save Changes'}

@@ -6,6 +6,7 @@ export type DomainType = 'primary' | 'custom' | 'subdomain';
 export type DatabaseType = 'postgresql' | 'mysql' | 'redis' | 'mongodb';
 export type DatabaseStatus = 'running' | 'stopped' | 'provisioning';
 
+// Frontend App type (camelCase - snakeToCamel converter handles the mapping)
 export interface App {
   id: string;
   name: string;
@@ -16,29 +17,26 @@ export interface App {
   sourceUrl: string;
   branch: string;
   port: number;
-  buildCommand: string;
-  startCommand: string;
+  buildCmd: string;
   memoryLimit: number;
   cpuLimit: number;
   domains: Domain[];
   createdAt: string;
   updatedAt: string;
-  lastDeployAt: string;
-  lastDeployCommit: string;
-  url: string;
+  containerId: string;
 }
 
 export interface Deployment {
   id: string;
   appId: string;
   status: DeploymentStatus;
-  commit: string;
+  commitHash: string;
   commitMessage: string;
   branch: string;
   sourceType: SourceType;
   buildDuration: number;
   deployDuration: number;
-  logs: string;
+  buildLog: string;
   createdAt: string;
   finishedAt: string;
 }
@@ -47,7 +45,6 @@ export interface EnvVar {
   id: string;
   appId: string;
   key: string;
-  value: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,10 +52,9 @@ export interface EnvVar {
 export interface Domain {
   id: string;
   appId: string;
-  hostname: string;
+  domain: string;
   type: DomainType;
-  sslStatus: DomainSSLStatus;
-  verified: boolean;
+  sslEnabled: boolean;
   createdAt: string;
 }
 
@@ -67,25 +63,18 @@ export interface Volume {
   appId: string;
   name: string;
   mountPath: string;
-  sizeGB: number;
+  size: string;
   createdAt: string;
 }
 
 export interface Database {
   id: string;
-  name: string;
-  type: DatabaseType;
-  status: DatabaseStatus;
   appId: string;
-  appName: string;
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  databaseName: string;
-  connectionUrl: string;
-  sizeMB: number;
+  type: DatabaseType;
+  connectionStringEncrypted: string;
+  containerId: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CronJob {
@@ -132,14 +121,9 @@ export interface ServerStats {
 export interface AppMetrics {
   cpuUsage: number;
   memoryUsage: number;
-  memoryLimit: number;
   networkIn: number;
   networkOut: number;
-  requestCount: number;
-  responseTime: number;
-  timestamps: string[];
-  cpuHistory: number[];
-  memoryHistory: number[];
+  uptime: number;
 }
 
 export interface Activity {
@@ -158,7 +142,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  expires_at: number;
+  expiresAt: number;
 }
 
 export interface CreateAppRequest {
@@ -167,30 +151,29 @@ export interface CreateAppRequest {
   sourceUrl: string;
   branch?: string;
   framework?: string;
-  buildCommand?: string;
-  startCommand?: string;
+  buildCmd?: string;
   port?: number;
-  envVars?: Record<string, string>;
+  cpuLimit?: number;
+  memoryLimit?: number;
 }
 
 export interface UpdateAppRequest {
   name?: string;
   port?: number;
-  buildCommand?: string;
-  startCommand?: string;
+  buildCmd?: string;
   memoryLimit?: number;
   cpuLimit?: number;
 }
 
 export interface ProvisionDBRequest {
-  name: string;
   type: DatabaseType;
-  appId?: string;
+  connectionString: string;
 }
 
 export interface AddDomainRequest {
-  hostname: string;
+  domain: string;
   type: DomainType;
+  sslEnabled?: boolean;
 }
 
 export interface AddSSHKeyRequest {

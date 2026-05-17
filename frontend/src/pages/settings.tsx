@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { settingsApi } from '@/lib/api';
+import { settingsApi, authApi } from '@/lib/api';
 import { useServerStats } from '@/hooks/useApp';
 import type { SSHKey } from '@/types';
 import { toast } from 'sonner';
@@ -88,20 +88,57 @@ function ServerTab({ stats, isLoading }: { stats: ReturnType<typeof useServerSta
 }
 
 function SecurityTab() {
+  const queryClient = useQueryClient();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [ipWhitelist, setIpWhitelist] = useState('');
+  const [savingIP, setSavingIP] = useState(false);
 
-  const handlePasswordChange = () => {
+  // Fetch current settings including IP whitelist
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const { data } = await settingsApi.getSettings();
+      if (Array.isArray(data)) {
+        const ipSetting = (data as { key: string; value: string }[]).find(s => s.key === 'ip_whitelist');
+        if (ipSetting) setIpWhitelist(ipSetting.value);
+      }
+      return data;
+    },
+  });
+
+  const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-    toast.success('Password updated successfully');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    if (!currentPassword || !newPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+    try {
+      await authApi.changePassword({ currentPassword, newPassword });
+      toast.success('Password updated successfully');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch {
+      toast.error('Failed to update password');
+    }
+  };
+
+  const handleSaveIPWhitelist = async () => {
+    setSavingIP(true);
+    try {
+      await settingsApi.updateIPWhitelist(ipWhitelist);
+      toast.success('IP whitelist saved');
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    } catch {
+      toast.error('Failed to save IP whitelist');
+    } finally {
+      setSavingIP(false);
+    }
   };
 
   return (
@@ -126,7 +163,7 @@ function SecurityTab() {
             <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Confirm New Password</label>
             <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
           </div>
-          <Button onClick={handlePasswordChange} disabled={!currentPassword || !newPassword}>
+          <Button onClick={handlePasswordChange} disabled={!currentPassword || !newPassword || !confirmPassword}>
             Update Password
           </Button>
         </CardContent>
@@ -149,7 +186,9 @@ function SecurityTab() {
               onChange={(e) => setIpWhitelist(e.target.value)}
             />
           </div>
-          <Button variant="outline">Save IP Whitelist</Button>
+          <Button variant="outline" onClick={handleSaveIPWhitelist} disabled={savingIP}>
+            {savingIP ? 'Saving...' : 'Save IP Whitelist'}
+          </Button>
         </CardContent>
       </Card>
     </div>

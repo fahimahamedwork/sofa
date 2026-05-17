@@ -16,7 +16,6 @@ import type {
   AddDomainRequest,
 } from '@/types';
 import { toast } from 'sonner';
-import { snakeToCamel } from '@/lib/utils';
 
 // App queries
 export function useApps() {
@@ -37,14 +36,14 @@ export function useApps() {
   });
 }
 
-export function useApp(slug: string) {
+export function useApp(id: string | undefined) {
   return useQuery({
-    queryKey: ['apps', slug],
+    queryKey: ['apps', id],
     queryFn: async () => {
-      const { data } = await appsApi.getApp(slug);
+      const { data } = await appsApi.getApp(id!);
       return data;
     },
-    enabled: !!slug,
+    enabled: !!id,
   });
 }
 
@@ -65,15 +64,15 @@ export function useCreateApp() {
   });
 }
 
-export function useUpdateApp(slug: string) {
+export function useUpdateApp(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: UpdateAppRequest) => {
-      const res = await appsApi.updateApp(slug, data);
+      const res = await appsApi.updateApp(id, data);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+      queryClient.invalidateQueries({ queryKey: ['apps', id] });
       queryClient.invalidateQueries({ queryKey: ['apps'] });
       toast.success('Application updated');
     },
@@ -86,8 +85,8 @@ export function useUpdateApp(slug: string) {
 export function useDeleteApp() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (slug: string) => {
-      await appsApi.deleteApp(slug);
+    mutationFn: async (id: string) => {
+      await appsApi.deleteApp(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apps'] });
@@ -102,11 +101,11 @@ export function useDeleteApp() {
 export function useStartApp() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (slug: string) => {
-      await appsApi.startApp(slug);
+    mutationFn: async (id: string) => {
+      await appsApi.startApp(id);
     },
-    onSuccess: (_, slug) => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['apps', id] });
       queryClient.invalidateQueries({ queryKey: ['apps'] });
       toast.success('Application started');
     },
@@ -119,11 +118,11 @@ export function useStartApp() {
 export function useStopApp() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (slug: string) => {
-      await appsApi.stopApp(slug);
+    mutationFn: async (id: string) => {
+      await appsApi.stopApp(id);
     },
-    onSuccess: (_, slug) => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['apps', id] });
       queryClient.invalidateQueries({ queryKey: ['apps'] });
       toast.success('Application stopped');
     },
@@ -136,11 +135,11 @@ export function useStopApp() {
 export function useRestartApp() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (slug: string) => {
-      await appsApi.restartApp(slug);
+    mutationFn: async (id: string) => {
+      await appsApi.restartApp(id);
     },
-    onSuccess: (_, slug) => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['apps', id] });
       queryClient.invalidateQueries({ queryKey: ['apps'] });
       toast.success('Application restarted');
     },
@@ -151,11 +150,11 @@ export function useRestartApp() {
 }
 
 // Deployments
-export function useDeployments(slug: string) {
+export function useDeployments(appId: string) {
   return useQuery({
-    queryKey: ['apps', slug, 'deployments'],
+    queryKey: ['apps', appId, 'deployments'],
     queryFn: async () => {
-      const { data } = await deploymentsApi.listDeployments(slug);
+      const { data } = await deploymentsApi.listDeployments(appId);
       // Backend returns {deployments: [...], total, page, page_size}
       if (data && typeof data === 'object' && 'deployments' in data) {
         return (data as { deployments: Deployment[] }).deployments;
@@ -165,20 +164,20 @@ export function useDeployments(slug: string) {
       }
       return [] as Deployment[];
     },
-    enabled: !!slug,
+    enabled: !!appId,
   });
 }
 
-export function useCreateDeployment(slug: string) {
+export function useCreateDeployment(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const res = await deploymentsApi.createDeployment(slug);
+      const res = await deploymentsApi.createDeployment(appId);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'deployments'] });
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'deployments'] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId] });
       toast.success('Deployment triggered');
     },
     onError: () => {
@@ -187,15 +186,15 @@ export function useCreateDeployment(slug: string) {
   });
 }
 
-export function useRollback(slug: string) {
+export function useRollback(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (deploymentId: string) => {
-      await deploymentsApi.rollback(slug, deploymentId);
+      await deploymentsApi.rollback(appId, deploymentId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'deployments'] });
-      queryClient.invalidateQueries({ queryKey: ['apps', slug] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'deployments'] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId] });
       toast.success('Rollback initiated');
     },
     onError: () => {
@@ -205,27 +204,27 @@ export function useRollback(slug: string) {
 }
 
 // Env Vars
-export function useEnvVars(slug: string) {
+export function useEnvVars(appId: string) {
   return useQuery({
-    queryKey: ['apps', slug, 'env'],
+    queryKey: ['apps', appId, 'env'],
     queryFn: async () => {
-      const { data } = await envVarsApi.listEnvVars(slug);
+      const { data } = await envVarsApi.listEnvVars(appId);
       if (Array.isArray(data)) return data;
       return [];
     },
-    enabled: !!slug,
+    enabled: !!appId,
   });
 }
 
-export function useCreateEnvVar(slug: string) {
+export function useCreateEnvVar(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: { key: string; value: string }) => {
-      const res = await envVarsApi.createEnvVar(slug, data);
+      const res = await envVarsApi.createEnvVar(appId, data);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'env'] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'env'] });
       toast.success('Environment variable added');
     },
     onError: () => {
@@ -234,15 +233,15 @@ export function useCreateEnvVar(slug: string) {
   });
 }
 
-export function useUpdateEnvVar(slug: string) {
+export function useUpdateEnvVar(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...data }: { id: string; key: string; value: string }) => {
-      const res = await envVarsApi.updateEnvVar(slug, id, data);
+    mutationFn: async (data: { key: string; value: string }) => {
+      const res = await envVarsApi.updateEnvVar(appId, data);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'env'] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'env'] });
       toast.success('Environment variable updated');
     },
     onError: () => {
@@ -251,14 +250,14 @@ export function useUpdateEnvVar(slug: string) {
   });
 }
 
-export function useDeleteEnvVar(slug: string) {
+export function useDeleteEnvVar() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await envVarsApi.deleteEnvVar(slug, id);
+    mutationFn: async ({ id, appId }: { id: string; appId: string }) => {
+      await envVarsApi.deleteEnvVar(id);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'env'] });
+    onSuccess: (_, { appId }) => {
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'env'] });
       toast.success('Environment variable removed');
     },
     onError: () => {
@@ -268,27 +267,27 @@ export function useDeleteEnvVar(slug: string) {
 }
 
 // Domains
-export function useAppDomains(slug: string) {
+export function useAppDomains(appId: string) {
   return useQuery({
-    queryKey: ['apps', slug, 'domains'],
+    queryKey: ['apps', appId, 'domains'],
     queryFn: async () => {
-      const { data } = await domainsApi.listDomains(slug);
+      const { data } = await domainsApi.listDomains(appId);
       if (Array.isArray(data)) return data;
       return [];
     },
-    enabled: !!slug,
+    enabled: !!appId,
   });
 }
 
-export function useAddDomain(slug: string) {
+export function useAddDomain(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: AddDomainRequest) => {
-      const res = await domainsApi.addDomain(slug, data);
+      const res = await domainsApi.addDomain(appId, data);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'domains'] });
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'domains'] });
       toast.success('Domain added');
     },
     onError: () => {
@@ -297,14 +296,14 @@ export function useAddDomain(slug: string) {
   });
 }
 
-export function useRemoveDomain(slug: string) {
+export function useRemoveDomain() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await domainsApi.removeDomain(slug, id);
+    mutationFn: async ({ id, appId }: { id: string; appId: string }) => {
+      await domainsApi.removeDomain(id);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apps', slug, 'domains'] });
+    onSuccess: (_, { appId }) => {
+      queryClient.invalidateQueries({ queryKey: ['apps', appId, 'domains'] });
       toast.success('Domain removed');
     },
     onError: () => {
@@ -314,18 +313,18 @@ export function useRemoveDomain(slug: string) {
 }
 
 // Metrics
-export function useAppMetrics(slug: string) {
+export function useAppMetrics(id: string) {
   return useQuery({
-    queryKey: ['apps', slug, 'metrics'],
+    queryKey: ['apps', id, 'metrics'],
     queryFn: async () => {
-      const { data } = await metricsApi.getAppMetrics(slug);
-      // Backend returns {app_id, app_name, status, metrics: {...}}
+      const { data } = await metricsApi.getAppMetrics(id);
+      // Backend returns {appId, appName, status, metrics: {...}}
       if (data && typeof data === 'object' && 'metrics' in data) {
-        return snakeToCamel<AppMetrics>((data as { metrics: unknown }).metrics);
+        return (data as { metrics: AppMetrics }).metrics;
       }
-      return snakeToCamel<AppMetrics>(data);
+      return data as AppMetrics;
     },
-    enabled: !!slug,
+    enabled: !!id,
     refetchInterval: 10000,
   });
 }
@@ -335,7 +334,7 @@ export function useServerStats() {
     queryKey: ['server', 'stats'],
     queryFn: async () => {
       const { data } = await metricsApi.getServerStats();
-      return snakeToCamel<ServerStats>(data);
+      return data as ServerStats;
     },
     refetchInterval: 10000,
   });

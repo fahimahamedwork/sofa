@@ -91,9 +91,9 @@ export function AppsPage() {
             <AppCard
               key={app.id}
               app={app}
-              onStart={(slug) => startApp.mutate(slug)}
-              onStop={(slug) => stopApp.mutate(slug)}
-              onRestart={(slug) => restartApp.mutate(slug)}
+              onStart={(id) => startApp.mutate(id)}
+              onStop={(id) => stopApp.mutate(id)}
+              onRestart={(id) => restartApp.mutate(id)}
             />
           ))}
         </div>
@@ -104,15 +104,15 @@ export function AppsPage() {
             <span className="w-40">Name</span>
             <span className="w-20">Framework</span>
             <span className="w-24">Status</span>
-            <span className="flex-1">Last Deploy</span>
+            <span className="flex-1">Source</span>
           </div>
           {filteredApps.map((app) => (
             <AppListItem
               key={app.id}
               app={app}
-              onStart={(slug) => startApp.mutate(slug)}
-              onStop={(slug) => stopApp.mutate(slug)}
-              onRestart={(slug) => restartApp.mutate(slug)}
+              onStart={(id) => startApp.mutate(id)}
+              onStop={(id) => stopApp.mutate(id)}
+              onRestart={(id) => restartApp.mutate(id)}
             />
           ))}
         </div>

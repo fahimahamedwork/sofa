@@ -22,8 +22,7 @@ export function DeployWizard() {
   const [branch, setBranch] = useState('main');
   const [appName, setAppName] = useState('');
   const [framework, setFramework] = useState('');
-  const [buildCommand, setBuildCommand] = useState('');
-  const [startCommand, setStartCommand] = useState('');
+  const [buildCmd, setBuildCmd] = useState('');
   const [port, setPort] = useState('3000');
   const createApp = useCreateApp();
   const navigate = useNavigate();
@@ -44,11 +43,12 @@ export function DeployWizard() {
         sourceUrl,
         branch: sourceType === 'git' ? branch : undefined,
         framework: framework || undefined,
-        buildCommand: buildCommand || undefined,
-        startCommand: startCommand || undefined,
+        buildCmd: buildCmd || undefined,
         port: port ? parseInt(port) : undefined,
       });
-      navigate(`/apps/${result.slug}`);
+      // Navigate using the numeric ID from the backend
+      const appId = result?.id;
+      navigate(`/apps/${appId}`);
     } catch {
       // Error handled by mutation
     }
@@ -163,26 +163,18 @@ export function DeployWizard() {
                     <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Build Command</label>
                     <Input
                       placeholder="npm run build"
-                      value={buildCommand}
-                      onChange={(e) => setBuildCommand(e.target.value)}
+                      value={buildCmd}
+                      onChange={(e) => setBuildCmd(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Start Command</label>
+                    <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Port</label>
                     <Input
-                      placeholder="npm start"
-                      value={startCommand}
-                      onChange={(e) => setStartCommand(e.target.value)}
+                      placeholder="3000"
+                      value={port}
+                      onChange={(e) => setPort(e.target.value)}
                     />
                   </div>
-                </div>
-                <div className="w-32">
-                  <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Port</label>
-                  <Input
-                    placeholder="3000"
-                    value={port}
-                    onChange={(e) => setPort(e.target.value)}
-                  />
                 </div>
               </div>
             </div>
@@ -219,16 +211,10 @@ export function DeployWizard() {
                     <span className="text-zinc-200 font-medium">{framework}</span>
                   </div>
                 )}
-                {buildCommand && (
+                {buildCmd && (
                   <div className="flex justify-between text-sm">
                     <span className="text-zinc-400">Build Command</span>
-                    <span className="text-zinc-200 font-mono text-xs">{buildCommand}</span>
-                  </div>
-                )}
-                {startCommand && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">Start Command</span>
-                    <span className="text-zinc-200 font-mono text-xs">{startCommand}</span>
+                    <span className="text-zinc-200 font-mono text-xs">{buildCmd}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">

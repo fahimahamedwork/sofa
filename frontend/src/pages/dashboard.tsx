@@ -20,7 +20,8 @@ export function DashboardPage() {
     queryKey: ['activity'],
     queryFn: async () => {
       const { data } = await activityApi.getRecent();
-      return data;
+      if (Array.isArray(data)) return data;
+      return [];
     },
   });
 
@@ -110,7 +111,7 @@ export function DashboardPage() {
                 {apps.slice(0, 5).map((app) => (
                   <Link
                     key={app.id}
-                    to={`/apps/${app.slug}`}
+                    to={`/apps/${app.id}`}
                     className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-zinc-800/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -121,7 +122,7 @@ export function DashboardPage() {
                       }`} />
                       <span className="text-sm text-zinc-200">{app.name}</span>
                     </div>
-                    <StatusBadge status={app.status} />
+                    <StatusBadge status={app.status || 'stopped'} />
                   </Link>
                 ))}
               </div>

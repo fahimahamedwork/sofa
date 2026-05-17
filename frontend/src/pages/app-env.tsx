@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Save } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { EnvVarRow } from '@/components/env/env-var-row';
@@ -10,11 +10,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { useEnvVars, useCreateEnvVar, useUpdateEnvVar, useDeleteEnvVar, useRestartApp } from '@/hooks/useApp';
 
 export function AppEnvPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: envVars, isLoading } = useEnvVars(slug!);
-  const createEnvVar = useCreateEnvVar(slug!);
-  const updateEnvVar = useUpdateEnvVar(slug!);
-  const deleteEnvVar = useDeleteEnvVar(slug!);
+  const { id } = useParams<{ id: string }>();
+  const { data: envVars, isLoading } = useEnvVars(id!);
+  const createEnvVar = useCreateEnvVar(id!);
+  const updateEnvVar = useUpdateEnvVar(id!);
+  const deleteEnvVar = useDeleteEnvVar();
   const restartApp = useRestartApp();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newKey, setNewKey] = useState('');
@@ -31,6 +31,14 @@ export function AppEnvPage() {
     });
   };
 
+  const handleUpdate = (envVarId: string, key: string, value: string) => {
+    updateEnvVar.mutate({ key, value });
+  };
+
+  const handleDelete = (envVarId: string) => {
+    deleteEnvVar.mutate({ id: envVarId, appId: id! });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -39,7 +47,7 @@ export function AppEnvPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => restartApp.mutate(slug!)}
+            onClick={() => restartApp.mutate(id!)}
           >
             <Save className="h-3.5 w-3.5 mr-1" /> Save & Redeploy
           </Button>
@@ -96,8 +104,8 @@ export function AppEnvPage() {
                 <EnvVarRow
                   key={envVar.id}
                   envVar={envVar}
-                  onUpdate={(id, key, value) => updateEnvVar.mutate({ id, key, value })}
-                  onDelete={(id) => deleteEnvVar.mutate(id)}
+                  onUpdate={(id, key, value) => handleUpdate(id, key, value)}
+                  onDelete={(id) => handleDelete(id)}
                 />
               ))}
             </div>

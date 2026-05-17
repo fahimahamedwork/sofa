@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Database as DbIcon, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
+import { Plus, Database as DbIcon, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,9 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { databasesApi } from '@/lib/api';
-import type { Database, DatabaseType } from '@/types';
+import type { DatabaseType } from '@/types';
 import { toast } from 'sonner';
-import { cn, maskString } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 const dbTypeColors: Record<DatabaseType, string> = {
   postgresql: 'bg-sky-500/10 text-sky-400',
@@ -25,7 +25,8 @@ export function DatabasesPage() {
     queryKey: ['databases'],
     queryFn: async () => {
       const { data } = await databasesApi.listDatabases();
-      return data;
+      if (Array.isArray(data)) return data;
+      return [];
     },
   });
 
@@ -43,17 +44,17 @@ export function DatabasesPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dbName, setDbName] = useState('');
   const [dbType, setDbType] = useState<DatabaseType>('postgresql');
+  const [connectionString, setConnectionString] = useState('');
 
   const createDB = useMutation({
     mutationFn: async () => {
-      const { data } = await databasesApi.provisionDB({ name: dbName, type: dbType });
+      const { data } = await databasesApi.provisionDB({ type: dbType, connectionString });
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['databases'] });
-      setDbName('');
+      setConnectionString('');
       setDialogOpen(false);
       toast.success('Database provisioned');
     },
@@ -61,22 +62,6 @@ export function DatabasesPage() {
       toast.error('Failed to provision database');
     },
   });
-
-  const [visibleConn, setVisibleConn] = useState<Set<string>>(new Set());
-
-  const toggleConn = (id: string) => {
-    setVisibleConn((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
-  };
 
   return (
     <div className="space-y-6">
@@ -97,10 +82,6 @@ export function DatabasesPage() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Name</label>
-                <Input placeholder="my-database" value={dbName} onChange={(e) => setDbName(e.target.value)} />
-              </div>
-              <div>
                 <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   {(['postgresql', 'mysql', 'redis', 'mongodb'] as DatabaseType[]).map((type) => (
@@ -120,10 +101,19 @@ export function DatabasesPage() {
                   ))}
                 </div>
               </div>
+              <div>
+                <label className="text-sm font-medium text-zinc-300 mb-1.5 block">Connection String</label>
+                <Input
+                  placeholder="postgres://user:pass@host:5432/dbname"
+                  value={connectionString}
+                  onChange={(e) => setConnectionString(e.target.value)}
+                  className="font-mono"
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => createDB.mutate()} disabled={!dbName.trim() || createDB.isPending}>
+              <Button onClick={() => createDB.mutate()} disabled={!connectionString.trim() || createDB.isPending}>
                 {createDB.isPending ? 'Provisioning...' : 'Provision'}
               </Button>
             </DialogFooter>
@@ -143,48 +133,24 @@ export function DatabasesPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {databases.map((db: Database) => (
+          {databases.map((db: any) => (
             <Card key={db.id}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Badge className={cn('text-[10px]', dbTypeColors[db.type])}>
+                    <Badge className={cn('text-[10px]', dbTypeColors[db.type as DatabaseType] || 'bg-zinc-700 text-zinc-300')}>
                       {db.type}
                     </Badge>
-                    <CardTitle className="text-base">{db.name}</CardTitle>
+                    <CardTitle className="text-base">Database #{db.id}</CardTitle>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeDB.mutate(db.id)}>
                     <Trash2 className="h-3.5 w-3.5 text-red-400" />
                   </Button>
                 </div>
                 <CardDescription>
-                  {db.appName ? `Linked to ${db.appName}` : 'Standalone'} &middot; {db.sizeMB} MB
+                  Created {db.createdAt ? new Date(db.createdAt).toLocaleDateString() : 'N/A'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-400">Host</span>
-                  <span className="text-zinc-200 font-mono text-xs">{db.host}:{db.port}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-400">Database</span>
-                  <span className="text-zinc-200 font-mono text-xs">{db.databaseName}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-400">Connection URL</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-zinc-200 font-mono text-xs max-w-[200px] truncate">
-                      {visibleConn.has(db.id) ? db.connectionUrl : maskString(db.connectionUrl)}
-                    </span>
-                    <button onClick={() => toggleConn(db.id)} className="text-zinc-500 hover:text-zinc-300">
-                      {visibleConn.has(db.id) ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                    </button>
-                    <button onClick={() => copyToClipboard(db.connectionUrl)} className="text-zinc-500 hover:text-zinc-300">
-                      <Copy className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </CardContent>
             </Card>
           ))}
         </div>

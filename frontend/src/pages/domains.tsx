@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Globe, ShieldCheck, ShieldAlert, ExternalLink } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
@@ -12,7 +12,8 @@ export function DomainsPage() {
     queryKey: ['domains'],
     queryFn: async () => {
       const { data } = await domainsApi.listAllDomains();
-      return data;
+      if (Array.isArray(data)) return data;
+      return [];
     },
   });
 
@@ -32,7 +33,7 @@ export function DomainsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-50">
-                {domains?.filter((d: Domain) => d.sslStatus === 'active').length ?? 0}
+                {domains?.filter((d: Domain) => d.sslEnabled).length ?? 0}
               </p>
               <p className="text-xs text-zinc-400">SSL Active</p>
             </div>
@@ -45,9 +46,9 @@ export function DomainsPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-zinc-50">
-                {domains?.filter((d: Domain) => d.sslStatus === 'pending' || d.sslStatus === 'error').length ?? 0}
+                {domains?.filter((d: Domain) => !d.sslEnabled).length ?? 0}
               </p>
-              <p className="text-xs text-zinc-400">SSL Pending/Issue</p>
+              <p className="text-xs text-zinc-400">No SSL</p>
             </div>
           </div>
         </Card>
@@ -85,10 +86,10 @@ export function DomainsPage() {
                 className="flex items-center gap-4 px-4 py-3 border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors"
               >
                 <Globe className="h-4 w-4 text-zinc-400 shrink-0" />
-                <span className="text-sm text-zinc-200 flex-1">{domain.hostname}</span>
-                <Badge variant="secondary" className="text-[10px]">{domain.appId}</Badge>
-                <Badge variant={domain.sslStatus === 'active' ? 'running' : domain.sslStatus === 'error' ? 'error' : 'outline'} className="text-[10px]">
-                  {domain.sslStatus === 'active' ? 'SSL Active' : domain.sslStatus === 'pending' ? 'SSL Pending' : domain.sslStatus === 'error' ? 'SSL Error' : 'No SSL'}
+                <span className="text-sm text-zinc-200 flex-1">{domain.domain}</span>
+                <Badge variant="secondary" className="text-[10px]">{domain.type}</Badge>
+                <Badge variant={domain.sslEnabled ? 'running' : 'outline'} className="text-[10px]">
+                  {domain.sslEnabled ? 'SSL Active' : 'No SSL'}
                 </Badge>
                 <ExternalLink className="h-3.5 w-3.5 text-zinc-500" />
               </Link>

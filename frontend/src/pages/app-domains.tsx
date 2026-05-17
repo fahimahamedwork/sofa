@@ -10,19 +10,20 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { useAppDomains, useAddDomain, useRemoveDomain } from '@/hooks/useApp';
 import { domainsApi } from '@/lib/api';
 import { toast } from 'sonner';
+import type { DomainType } from '@/types';
 
 export function AppDomainsPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: domains, isLoading } = useAppDomains(slug!);
-  const addDomain = useAddDomain(slug!);
-  const removeDomain = useRemoveDomain(slug!);
+  const { id } = useParams<{ id: string }>();
+  const { data: domains, isLoading } = useAppDomains(id!);
+  const addDomain = useAddDomain(id!);
+  const removeDomain = useRemoveDomain();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [hostname, setHostname] = useState('');
-  const [domainType, setDomainType] = useState<'primary' | 'custom' | 'subdomain'>('custom');
+  const [domainType, setDomainType] = useState<DomainType>('custom');
 
   const handleAdd = () => {
     if (!hostname.trim()) return;
-    addDomain.mutate({ hostname, type: domainType }, {
+    addDomain.mutate({ domain: hostname, type: domainType }, {
       onSuccess: () => {
         setHostname('');
         setDialogOpen(false);
@@ -30,22 +31,26 @@ export function AppDomainsPage() {
     });
   };
 
-  const handleVerify = async (id: string) => {
+  const handleVerify = async (domainId: string) => {
     try {
-      await domainsApi.verifyDomain(slug!, id);
+      await domainsApi.verifyDomain(domainId);
       toast.success('Domain verification initiated');
     } catch {
       toast.error('Verification failed');
     }
   };
 
-  const handleSetPrimary = async (id: string) => {
+  const handleSetPrimary = async (domainId: string) => {
     try {
-      await domainsApi.setPrimary(slug!, id);
+      await domainsApi.setPrimary(domainId);
       toast.success('Primary domain updated');
     } catch {
       toast.error('Failed to set primary domain');
     }
+  };
+
+  const handleRemove = (domainId: string) => {
+    removeDomain.mutate({ id: domainId, appId: id! });
   };
 
   return (
@@ -118,7 +123,7 @@ export function AppDomainsPage() {
             <DomainCard
               key={domain.id}
               domain={domain}
-              onRemove={(id) => removeDomain.mutate(id)}
+              onRemove={handleRemove}
               onSetPrimary={handleSetPrimary}
               onVerify={handleVerify}
             />

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { useSocket } from '@/hooks/useSocket';
+import { socketManager } from '@/lib/socket';
 
 interface LogEntry {
   timestamp: string;
@@ -40,23 +40,36 @@ export function LogViewer({ appId, className }: LogViewerProps) {
   const [paused, setPaused] = useState(false);
   const [filter, setFilter] = useState('');
   const pausedRef = useRef(false);
-  const { joinRoom, leaveRoom } = useSocket(`app:${appId}:logs`, (data: unknown) => {
-    if (pausedRef.current) return;
-    const entry = data as { message: string; timestamp?: string; level?: string };
-    setLogs((prev) => [
-      ...prev.slice(-999),
-      {
-        timestamp: entry.timestamp || new Date().toISOString(),
-        level: entry.level || getLevelFromLine(entry.message),
-        message: entry.message,
-      },
-    ]);
-  });
 
   useEffect(() => {
-    joinRoom(`app:${appId}:logs`);
-    return () => leaveRoom(`app:${appId}:logs`);
-  }, [appId, joinRoom, leaveRoom]);
+    const token = localStorage.getItem('sofa_token');
+    socketManager.connect(token || undefined);
+
+    const room = `app:${appId}:logs`;
+    socketManager.joinRoom(room);
+
+    const handleLog = (data: unknown) => {
+      if (pausedRef.current) return;
+      const entry = data as { message?: string; data?: string; timestamp?: string; level?: string };
+      const message = entry.message || entry.data || '';
+      if (!message) return;
+      setLogs((prev) => [
+        ...prev.slice(-999),
+        {
+          timestamp: entry.timestamp || new Date().toISOString(),
+          level: entry.level || getLevelFromLine(message),
+          message,
+        },
+      ]);
+    };
+
+    socketManager.on(room, handleLog);
+
+    return () => {
+      socketManager.off(room, handleLog);
+      socketManager.leaveRoom(room);
+    };
+  }, [appId]);
 
   useEffect(() => {
     pausedRef.current = paused;

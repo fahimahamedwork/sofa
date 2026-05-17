@@ -3,12 +3,16 @@ package service
 import (
         "context"
         "fmt"
+        "log"
         "regexp"
         "strings"
         "time"
 
         "github.com/sofa/sofa-backend/internal/crypto"
+        "github.com/sofa/sofa-backend/internal/deploy"
         "github.com/sofa/sofa-backend/internal/model"
+        "github.com/sofa/sofa-backend/internal/queue"
+        "github.com/sofa/sofa-backend/internal/realtime"
         "github.com/sofa/sofa-backend/internal/repository"
 )
 
@@ -198,14 +202,26 @@ func (s *AppService) RestartApp(ctx context.Context, id uint64) error {
 
 // DeployService handles deployment business logic
 type DeployService struct {
-        deployRepo *repository.DeploymentRepo
-        appRepo    *repository.AppRepo
+        deployRepo   *repository.DeploymentRepo
+        appRepo      *repository.AppRepo
+        pipeline     *deploy.Pipeline
+        queueClient  *queue.Client
+        hub          *realtime.Hub
 }
 
-func NewDeployService(deployRepo *repository.DeploymentRepo, appRepo *repository.AppRepo) *DeployService {
+func NewDeployService(
+        deployRepo *repository.DeploymentRepo,
+        appRepo *repository.AppRepo,
+        pipeline *deploy.Pipeline,
+        queueClient *queue.Client,
+        hub *realtime.Hub,
+) *DeployService {
         return &DeployService{
-                deployRepo: deployRepo,
-                appRepo:    appRepo,
+                deployRepo:  deployRepo,
+                appRepo:     appRepo,
+                pipeline:    pipeline,
+                queueClient: queueClient,
+                hub:         hub,
         }
 }
 
@@ -238,7 +254,42 @@ func (s *DeployService) CreateDeployment(ctx context.Context, appID uint64, sour
         // Update app status to building
         _ = s.appRepo.UpdateStatus(ctx, appID, model.AppStatusBuilding)
 
+        // Trigger the deployment pipeline
+        s.triggerDeployment(app, deployment)
+
         return deployment, nil
+}
+
+// triggerDeployment starts the deployment either via queue or directly via pipeline
+func (s *DeployService) triggerDeployment(app *model.App, deployment *model.Deployment) {
+        // Try to enqueue via Redis/asynq first
+        if s.queueClient != nil {
+                if err := s.queueClient.EnqueueDeploy(app.ID, deployment.ID); err != nil {
+                        log.Printf("Failed to enqueue deploy task, running directly: %v", err)
+                        // Fall back to running pipeline directly
+                        go s.runPipelineDirectly(app, deployment)
+                }
+        } else {
+                // No queue available, run pipeline directly in a goroutine
+                go s.runPipelineDirectly(app, deployment)
+        }
+}
+
+func (s *DeployService) runPipelineDirectly(app *model.App, deployment *model.Deployment) {
+        if s.pipeline == nil {
+                log.Printf("Pipeline is nil, cannot deploy app=%d deployment=%d", app.ID, deployment.ID)
+                // Mark as failed
+                ctx := context.Background()
+                _ = s.deployRepo.UpdateStatus(ctx, deployment.ID, model.DeployStatusFailed)
+                _ = s.deployRepo.UpdateBuildLog(ctx, deployment.ID, "Docker daemon is not available - deploy functionality is disabled")
+                _ = s.appRepo.UpdateStatus(ctx, app.ID, model.AppStatusError)
+                return
+        }
+
+        ctx := context.Background()
+        if err := s.pipeline.RunPipeline(ctx, app, deployment); err != nil {
+                log.Printf("Deploy pipeline failed: app=%d deployment=%d error=%v", app.ID, deployment.ID, err)
+        }
 }
 
 func (s *DeployService) GetDeployments(ctx context.Context, appID uint64, page, pageSize int) ([]model.Deployment, int64, error) {

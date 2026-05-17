@@ -10,7 +10,7 @@ const sourceTypes: { type: SourceType; label: string; description: string; icon:
     icon: GitBranch,
   },
   {
-    type: 'docker-image',
+    type: 'docker_image',
     label: 'Docker Image',
     description: 'Deploy a pre-built Docker image from a registry',
     icon: Container,

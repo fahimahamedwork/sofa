@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight, Rocket, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SourceSelector } from './source-selector';
-import { useCreateApp } from '@/hooks/useApp';
+import { useCreateApp, useCreateDeployment } from '@/hooks/useApp';
+import { deploymentsApi } from '@/lib/api';
 import type { SourceType } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -37,7 +38,8 @@ export function DeployWizard() {
     if (!sourceType || !appName) return;
 
     try {
-      const result = await createApp.mutateAsync({
+      // Step 1: Create the app record
+      const app = await createApp.mutateAsync({
         name: appName,
         sourceType,
         sourceUrl,
@@ -46,9 +48,18 @@ export function DeployWizard() {
         buildCmd: buildCmd || undefined,
         port: port ? parseInt(port) : undefined,
       });
-      // Navigate using the numeric ID from the backend
-      const appId = result?.id;
-      navigate(`/apps/${appId}`);
+
+      // Step 2: Trigger the first deployment
+      const appId = String(app?.id || '');
+      if (appId) {
+        try {
+          await deploymentsApi.createDeployment(appId);
+        } catch {
+          // Deployment trigger failed - app was still created, don't block
+        }
+        // Navigate to the app detail page
+        navigate(`/apps/${appId}`);
+      }
     } catch {
       // Error handled by mutation
     }
@@ -108,12 +119,12 @@ export function DeployWizard() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">
-                      {sourceType === 'git' ? 'Repository URL' : sourceType === 'docker-image' ? 'Image URL' : 'Repository URL'}
+                      {sourceType === 'git' ? 'Repository URL' : sourceType === 'docker_image' ? 'Image URL' : 'Repository URL'}
                     </label>
                     <Input
                       placeholder={
                         sourceType === 'git' ? 'https://github.com/owner/repo' :
-                        sourceType === 'docker-image' ? 'registry/image:tag' :
+                        sourceType === 'docker_image' ? 'registry/image:tag' :
                         'https://github.com/owner/repo'
                       }
                       value={sourceUrl}
@@ -193,7 +204,7 @@ export function DeployWizard() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Source Type</span>
-                  <span className="text-foreground font-medium capitalize">{sourceType?.replace('-', ' ')}</span>
+                  <span className="text-foreground font-medium capitalize">{sourceType?.replace('_', ' ')}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Source URL</span>

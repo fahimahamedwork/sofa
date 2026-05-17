@@ -609,6 +609,7 @@ func NewDatabaseHandler(dbSvc *service.DatabaseService) *DatabaseHandler {
 type ProvisionDBRequest struct {
         Type             string `json:"type" binding:"required"`
         ConnectionString string `json:"connection_string" binding:"required"`
+        AppID            uint64 `json:"app_id"` // Optional: associate with an app
 }
 
 func (h *DatabaseHandler) ListDatabases(c *gin.Context) {
@@ -670,6 +671,26 @@ func (h *DatabaseHandler) RemoveDB(c *gin.Context) {
         }
 
         successResponse(c, http.StatusOK, gin.H{"message": "Database removed"})
+}
+
+// ProvisionStandaloneDB provisions a database without requiring an app ID in the URL
+func (h *DatabaseHandler) ProvisionStandaloneDB(c *gin.Context) {
+        var req ProvisionDBRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+                errorResponse(c, http.StatusBadRequest, err.Error())
+                return
+        }
+
+        // Use the app_id from the request body if provided, otherwise use 0 (standalone)
+        appID := req.AppID
+
+        database, err := h.dbSvc.ProvisionDB(c.Request.Context(), appID, model.DatabaseType(req.Type), req.ConnectionString)
+        if err != nil {
+                errorResponse(c, http.StatusInternalServerError, err.Error())
+                return
+        }
+
+        successResponse(c, http.StatusCreated, database)
 }
 
 // VolumeHandler handles volume endpoints
@@ -1048,6 +1069,7 @@ func RegisterRoutes(
                 databases := protected.Group("/databases")
                 {
                         databases.GET("", dbHandler.ListAllDatabases)
+                        databases.POST("", dbHandler.ProvisionStandaloneDB)
                         databases.DELETE("/:id", dbHandler.RemoveDB)
                 }
 

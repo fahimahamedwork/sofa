@@ -19,6 +19,7 @@ import (
         "github.com/sofa/sofa-backend/internal/config"
         "github.com/sofa/sofa-backend/internal/crypto"
         "github.com/sofa/sofa-backend/internal/deploy"
+        "github.com/sofa/sofa-backend/internal/docker"
         "github.com/sofa/sofa-backend/internal/handler"
         "github.com/sofa/sofa-backend/internal/middleware"
         "github.com/sofa/sofa-backend/internal/model"
@@ -77,7 +78,7 @@ func main() {
 
         // Initialize services
         appService := service.NewAppService(appRepo, deployRepo, envVarRepo, domainRepo, volumeRepo, databaseRepo, cronJobRepo)
-        deployService := service.NewDeployService(deployRepo, appRepo)
+        deployService := service.NewDeployService(deployRepo, appRepo, pipeline, queueClient, hub)
         envVarService := service.NewEnvVarService(envVarRepo, encryptor)
         domainService := service.NewDomainService(domainRepo, appRepo, cfg.Traefik.BaseDomain)
         databaseService := service.NewDatabaseService(databaseRepo, encryptor)
@@ -93,10 +94,20 @@ func main() {
         traefikManager := proxy.NewTraefikManager(cfg.Traefik.APIURL, cfg.Traefik.BaseDomain)
         _ = traefikManager // Used by deploy pipeline and domain service
 
+        // Initialize Docker client
+        var dockerClient *docker.DockerClient
+        dockerClient, err = docker.NewDockerClient(cfg.Docker.SocketPath)
+        if err != nil {
+                zapLogger.Warn("Docker daemon not available, deploy functionality disabled", zap.Error(err))
+        }
+
         // Initialize deploy pipeline
-        // Docker client would be initialized here when Docker is available
-        pipeline := deploy.NewPipeline(nil, deployRepo, appRepo, envVarRepo, domainRepo, hub)
-        _ = pipeline
+        var pipeline *deploy.Pipeline
+        if dockerClient != nil {
+                pipeline = deploy.NewPipeline(dockerClient, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
+        } else {
+                pipeline = deploy.NewPipeline(nil, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
+        }
 
         // Try to initialize asynq queue client
         queueClient, qerr := queue.NewClient(

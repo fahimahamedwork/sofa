@@ -1,6 +1,6 @@
 export type AppStatus = 'running' | 'stopped' | 'building' | 'deploying' | 'error' | 'queued' | 'healthy' | 'failed';
 export type DeploymentStatus = 'queued' | 'building' | 'deploying' | 'success' | 'failed' | 'cancelled';
-export type SourceType = 'git' | 'docker-image' | 'dockerfile';
+export type SourceType = 'git' | 'docker_image' | 'dockerfile';
 export type DomainSSLStatus = 'active' | 'pending' | 'none' | 'error';
 export type DomainType = 'primary' | 'custom' | 'subdomain';
 export type DatabaseType = 'postgresql' | 'mysql' | 'redis' | 'mongodb';

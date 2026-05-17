@@ -89,6 +89,7 @@ services:
       - SOFA_AUTH_JWT_SECRET=sofa-production-secret-change-me
       - SOFA_AUTH_ADMIN_PASSWORD=admin
       - SOFA_DOCKER_SOCKET_PATH=/var/run/docker.sock
+      - SOFA_DOCKER_NETWORK_NAME=sofa-network
       - SOFA_TRAEFIK_API_URL=http://traefik:8080
       - SOFA_TRAEFIK_BASE_DOMAIN=localhost
     ports:

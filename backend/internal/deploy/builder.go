@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,8 +24,8 @@ func NewBuilder(dockerClient *docker.DockerClient) *Builder {
 }
 
 type BuildResult struct {
-	ImageID  string
-	Log      string
+	ImageID string
+	Log     string
 }
 
 // Build builds a Docker image from the app source
@@ -34,11 +35,13 @@ func (b *Builder) Build(ctx context.Context, app *model.App, deployment *model.D
 
 	// For git sources, clone the repository
 	if app.SourceType == model.SourceTypeGit {
+		log.Printf("Cloning repository: %s branch=%s", app.SourceURL, deployment.Branch)
 		sourceDir, err = git.CloneRepo(ctx, app.SourceURL, deployment.Branch, "")
 		if err != nil {
 			return "", "", fmt.Errorf("cloning repository: %w", err)
 		}
 		defer os.RemoveAll(sourceDir)
+		log.Printf("Repository cloned to: %s", sourceDir)
 	} else {
 		// For dockerfile source, we'd have the source in a temp dir already
 		sourceDir = "/tmp/sofa-build-" + app.Slug
@@ -48,11 +51,13 @@ func (b *Builder) Build(ctx context.Context, app *model.App, deployment *model.D
 	framework := app.Framework
 	if framework == "" {
 		framework = DetectFramework(sourceDir)
+		log.Printf("Detected framework: %s", framework)
 	}
 
 	// Generate Dockerfile if one doesn't exist
 	dockerfilePath := filepath.Join(sourceDir, "Dockerfile")
 	if _, err := os.Stat(dockerfilePath); os.IsNotExist(err) {
+		log.Printf("No Dockerfile found, generating one for framework: %s", framework)
 		generatedDockerfile, err := GenerateDockerfile(framework, app)
 		if err != nil {
 			return "", "", fmt.Errorf("generating Dockerfile: %w", err)
@@ -61,6 +66,8 @@ func (b *Builder) Build(ctx context.Context, app *model.App, deployment *model.D
 		if err := os.WriteFile(dockerfilePath, []byte(generatedDockerfile), 0644); err != nil {
 			return "", "", fmt.Errorf("writing Dockerfile: %w", err)
 		}
+	} else {
+		log.Printf("Using existing Dockerfile")
 	}
 
 	// Build the Docker image
@@ -68,6 +75,8 @@ func (b *Builder) Build(ctx context.Context, app *model.App, deployment *model.D
 	if app.SourceType == model.SourceTypeDockerImage {
 		imageTag = app.SourceURL
 	}
+
+	log.Printf("Building Docker image: %s", imageTag)
 
 	// Create build context tar
 	buildContext, err := createBuildContext(sourceDir)
@@ -77,11 +86,11 @@ func (b *Builder) Build(ctx context.Context, app *model.App, deployment *model.D
 
 	err = b.dockerClient.BuildImage(ctx, buildContext, []string{imageTag}, "Dockerfile")
 	if err != nil {
-		return "", "", fmt.Errorf("building image: %w", err)
+		return "", "", fmt.Errorf("building image %s: %w", imageTag, err)
 	}
 
-	log := fmt.Sprintf("Built image %s from %s (framework: %s)", imageTag, sourceDir, framework)
-	return imageTag, log, nil
+	buildLog := fmt.Sprintf("Built image %s from %s (framework: %s)", imageTag, sourceDir, framework)
+	return imageTag, buildLog, nil
 }
 
 // DetectFramework analyzes the source directory to determine the framework

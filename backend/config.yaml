@@ -23,6 +23,7 @@ auth:
 
 docker:
   socket_path: "/var/run/docker.sock"
+  network_name: "sofa-network"
 
 traefik:
   api_url: "http://traefik:8080"

@@ -3,6 +3,7 @@ package deploy
 import (
         "context"
         "fmt"
+        "log"
         "time"
 
         "github.com/sofa/sofa-backend/internal/crypto"
@@ -10,6 +11,11 @@ import (
         "github.com/sofa/sofa-backend/internal/model"
         "github.com/sofa/sofa-backend/internal/realtime"
         "github.com/sofa/sofa-backend/internal/repository"
+)
+
+const (
+        // DefaultDockerNetwork is the Docker network that deployed containers join
+        DefaultDockerNetwork = "sofa-network"
 )
 
 type Pipeline struct {
@@ -21,6 +27,7 @@ type Pipeline struct {
         builder       *Builder
         hub           *realtime.Hub
         encryptor     *crypto.Encryptor
+        networkName   string
 }
 
 func NewPipeline(
@@ -31,7 +38,11 @@ func NewPipeline(
         domainRepo *repository.DomainRepo,
         hub *realtime.Hub,
         encryptor *crypto.Encryptor,
+        networkName string,
 ) *Pipeline {
+        if networkName == "" {
+                networkName = DefaultDockerNetwork
+        }
         return &Pipeline{
                 dockerClient: dockerClient,
                 deployRepo:   deployRepo,
@@ -41,6 +52,7 @@ func NewPipeline(
                 builder:      NewBuilder(dockerClient),
                 hub:          hub,
                 encryptor:    encryptor,
+                networkName:  networkName,
         }
 }
 
@@ -51,6 +63,9 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
                 p.handleFailure(ctx, deployment, app, "Docker daemon is not available - deploy functionality is disabled")
                 return fmt.Errorf("docker daemon is not available")
         }
+
+        log.Printf("Starting deployment pipeline: app=%s (%d) deployment=%d source=%s type=%s",
+                app.Name, app.ID, deployment.ID, app.SourceURL, app.SourceType)
 
         // Step 1: Update status to building
         if err := p.deployRepo.UpdateStatus(ctx, deployment.ID, model.DeployStatusBuilding); err != nil {
@@ -67,6 +82,7 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
         switch app.SourceType {
         case model.SourceTypeDockerImage:
                 p.broadcastLog(deployment.ID, "Pulling Docker image: "+app.SourceURL)
+                log.Printf("Pulling Docker image: %s", app.SourceURL)
                 if err := p.dockerClient.PullImage(ctx, app.SourceURL); err != nil {
                         p.handleFailure(ctx, deployment, app, "Failed to pull image: "+err.Error())
                         return err
@@ -75,12 +91,14 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
                 buildLog = "Image pulled successfully: " + app.SourceURL
 
         case model.SourceTypeGit, model.SourceTypeDockerfile:
-                p.broadcastLog(deployment.ID, "Building application...")
+                p.broadcastLog(deployment.ID, "Building application from source...")
+                log.Printf("Building application from source: url=%s branch=%s", app.SourceURL, app.Branch)
                 imageID, buildLog, err = p.builder.Build(ctx, app, deployment)
                 if err != nil {
                         p.handleFailure(ctx, deployment, app, "Build failed: "+err.Error())
                         return err
                 }
+                log.Printf("Image built successfully: %s", imageID)
 
         default:
                 p.handleFailure(ctx, deployment, app, "Unknown source type: "+string(app.SourceType))
@@ -105,11 +123,12 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
                 if err := p.dockerClient.StopContainer(ctx, oldContainerID, &timeout); err != nil {
                         p.broadcastLog(deployment.ID, "Warning: failed to stop old container: "+err.Error())
                 }
-                // Don't remove yet - keep for rollback
+                // Remove old container to free up the container name
+                _ = p.dockerClient.RemoveContainer(ctx, oldContainerID)
         }
 
         // Step 5: Start new container
-        p.broadcastLog(deployment.ID, "Starting new container...")
+        p.broadcastLog(deployment.ID, "Starting new container with image: "+imageID)
 
         // Get env vars for the container
         envVars := make(map[string]string)
@@ -143,6 +162,7 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
                 MemoryLimit: app.MemoryLimit,
                 EnvVars:     envVars,
                 Domain:      domain,
+                NetworkName: p.networkName,
         })
         if err != nil {
                 p.handleFailure(ctx, deployment, app, "Failed to create container: "+err.Error())
@@ -155,7 +175,8 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
 
         if err := p.dockerClient.StartContainer(ctx, containerID); err != nil {
                 p.handleFailure(ctx, deployment, app, "Failed to start container: "+err.Error())
-                // Try to restart old container
+                // Remove failed container and try to restart old one
+                _ = p.dockerClient.RemoveContainer(ctx, containerID)
                 if oldContainerID != "" {
                         _ = p.dockerClient.StartContainer(ctx, oldContainerID)
                 }
@@ -167,14 +188,14 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
         healthy := p.healthCheck(ctx, containerID, app.Port)
 
         if !healthy {
-                p.broadcastLog(deployment.ID, "Health check failed")
-                p.handleFailure(ctx, deployment, app, "Health check failed")
+                p.broadcastLog(deployment.ID, "Health check failed - container may have crashed")
+                p.handleFailure(ctx, deployment, app, "Health check failed - container is not running")
                 // Remove failed container and restart old one
                 _ = p.dockerClient.RemoveContainer(ctx, containerID)
                 if oldContainerID != "" {
                         _ = p.dockerClient.StartContainer(ctx, oldContainerID)
                 }
-                return fmt.Errorf("health check failed")
+                return fmt.Errorf("health check failed - container is not running")
         }
 
         // Step 7: Update status to healthy
@@ -188,13 +209,11 @@ func (p *Pipeline) RunPipeline(ctx context.Context, app *model.App, deployment *
         app.Status = model.AppStatusRunning
         _ = p.appRepo.Update(ctx, app)
 
-        // Remove old container now that new one is healthy
-        if oldContainerID != "" {
-                _ = p.dockerClient.RemoveContainer(ctx, oldContainerID)
-        }
-
         p.broadcastEvent(deployment.ID, "status", "healthy")
         p.broadcastLog(deployment.ID, "Deployment completed successfully!")
+
+        log.Printf("Deployment completed: app=%s (%d) deployment=%d container=%s image=%s",
+                app.Name, app.ID, deployment.ID, containerID, imageID)
 
         return nil
 }
@@ -205,6 +224,7 @@ func (p *Pipeline) handleFailure(ctx context.Context, deployment *model.Deployme
         _ = p.appRepo.UpdateStatus(ctx, app.ID, model.AppStatusError)
         p.broadcastEvent(deployment.ID, "status", "failed")
         p.broadcastLog(deployment.ID, message)
+        log.Printf("Deployment failed: app=%d deployment=%d reason=%s", app.ID, deployment.ID, message)
 }
 
 // healthCheck verifies that the newly deployed container is healthy

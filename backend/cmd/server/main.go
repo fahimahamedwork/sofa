@@ -94,9 +94,9 @@ func main() {
         // Initialize deploy pipeline (depends on dockerClient, repos, hub, encryptor)
         var pipeline *deploy.Pipeline
         if dockerClient != nil {
-                pipeline = deploy.NewPipeline(dockerClient, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
+                pipeline = deploy.NewPipeline(dockerClient, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor, cfg.Docker.NetworkName)
         } else {
-                pipeline = deploy.NewPipeline(nil, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor)
+                pipeline = deploy.NewPipeline(nil, deployRepo, appRepo, envVarRepo, domainRepo, hub, encryptor, cfg.Docker.NetworkName)
         }
 
         // Try to initialize asynq queue client (depends on Redis)

@@ -1,10 +1,13 @@
 package docker
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -109,7 +112,11 @@ func (d *DockerClient) CreateContainer(ctx context.Context, opts CreateContainer
 		}
 	}
 
-	resp, err := d.cli.ContainerCreate(ctx, containerConfig, hostConfig, networkingConfig, nil, "sofa-"+opts.AppSlug)
+	// Remove existing container with the same name if it exists (e.g. from a failed deploy)
+	containerName := "sofa-" + opts.AppSlug
+	_ = d.cli.ContainerRemove(ctx, containerName, container.RemoveOptions{Force: true})
+
+	resp, err := d.cli.ContainerCreate(ctx, containerConfig, hostConfig, networkingConfig, nil, containerName)
 	if err != nil {
 		return "", fmt.Errorf("creating container: %w", err)
 	}
@@ -243,8 +250,31 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string) error {
 	}
 	defer reader.Close()
 
-	_, err = io.ReadAll(reader)
-	return err
+	// Parse the Docker pull JSON stream to detect errors
+	var pullErr string
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+		var msg struct {
+			Error  string `json:"error"`
+			Status string `json:"status"`
+		}
+		if err := json.Unmarshal(line, &msg); err != nil {
+			continue
+		}
+		if msg.Error != "" {
+			pullErr = msg.Error
+		}
+	}
+
+	if pullErr != "" {
+		return fmt.Errorf("docker pull failed: %s", pullErr)
+	}
+
+	return nil
 }
 
 func (d *DockerClient) BuildImage(ctx context.Context, buildContext io.Reader, tags []string, dockerfile string) error {
@@ -261,8 +291,54 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildContext io.Reader, t
 	}
 	defer resp.Body.Close()
 
-	_, err = io.ReadAll(resp.Body)
-	return err
+	// Parse the Docker build JSON stream to detect errors.
+	// Docker's ImageBuild API returns HTTP 200 even when the build fails;
+	// the actual error is embedded in the JSON stream response body.
+	var buildErr string
+	var buildLogs []string
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+
+		var msg struct {
+			Stream string `json:"stream"`
+			Error  string `json:"error"`
+			Aux    *struct {
+				ID string `json:"ID"`
+			} `json:"aux"`
+		}
+		if err := json.Unmarshal(line, &msg); err != nil {
+			continue // skip non-JSON lines
+		}
+
+		if msg.Error != "" {
+			buildErr = msg.Error
+		}
+
+		// Collect build output for logging
+		if msg.Stream != "" {
+			streamMsg := strings.TrimSpace(msg.Stream)
+			if streamMsg != "" {
+				buildLogs = append(buildLogs, streamMsg)
+				fmt.Fprintf(os.Stderr, "[docker-build] %s\n", streamMsg)
+			}
+		}
+	}
+
+	if buildErr != "" {
+		// Include the last few build log lines for context
+		recentLogs := buildLogs
+		if len(recentLogs) > 10 {
+			recentLogs = recentLogs[len(recentLogs)-10:]
+		}
+		logSummary := strings.Join(recentLogs, "; ")
+		return fmt.Errorf("docker build failed: %s (recent output: %s)", buildErr, logSummary)
+	}
+
+	return nil
 }
 
 func (d *DockerClient) IsContainerRunning(ctx context.Context, containerID string) bool {
@@ -288,6 +364,11 @@ func (d *DockerClient) GetContainerAppID(cont types.Container) uint64 {
 
 func (d *DockerClient) Close() error {
 	return d.cli.Close()
+}
+
+// RemoveContainerByName forcefully removes a container by name (ignoring errors if it doesn't exist)
+func (d *DockerClient) RemoveContainerByName(ctx context.Context, name string) error {
+	return d.cli.ContainerRemove(ctx, name, container.RemoveOptions{Force: true})
 }
 
 // Helper to get app status from container state

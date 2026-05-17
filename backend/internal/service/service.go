@@ -330,8 +330,10 @@ func (s *DeployService) Rollback(ctx context.Context, appID uint64, deploymentID
                 return nil, fmt.Errorf("deployment does not belong to this app")
         }
 
-        if target.Status != model.DeployStatusHealthy {
-                return nil, fmt.Errorf("can only rollback to a healthy deployment")
+        // Allow rollback to healthy deployments, or to any deployment that has an image
+        // (even failed ones that still have a valid image ID from a previous successful build)
+        if target.Status != model.DeployStatusHealthy && target.ImageID == "" {
+                return nil, fmt.Errorf("cannot rollback to deployment %d: it has no image (status: %s)", deploymentID, target.Status)
         }
 
         // Create a new deployment based on the target
@@ -349,7 +351,43 @@ func (s *DeployService) Rollback(ctx context.Context, appID uint64, deploymentID
                 return nil, fmt.Errorf("creating rollback deployment: %w", err)
         }
 
+        // If the target deployment has an image, use it directly (skip build)
+        // by triggering a re-deploy with the existing image
+        if target.ImageID != "" && s.pipeline != nil {
+                go s.runRollbackPipeline(appID, rollback, target.ImageID)
+        }
+
         return rollback, nil
+}
+
+// runRollbackPipeline re-deploys using an existing image without rebuilding
+func (s *DeployService) runRollbackPipeline(appID uint64, rollback *model.Deployment, imageID string) {
+        ctx := context.Background()
+
+        app, err := s.appRepo.FindByID(ctx, appID)
+        if err != nil {
+                log.Printf("Rollback failed: could not find app %d: %v", appID, err)
+                return
+        }
+
+        // Update the deployment with the existing image ID
+        _ = s.deployRepo.UpdateImageID(ctx, rollback.ID, imageID)
+
+        // If the source was docker_image, just use the pipeline to create the container
+        // Otherwise, we need to create the container directly with the existing image
+        app.SourceType = model.SourceTypeDockerImage
+        app.SourceURL = imageID
+        app.ContainerID = "" // Reset so pipeline creates a new container
+
+        if s.pipeline == nil {
+                log.Printf("Rollback failed: pipeline is nil for app=%d", appID)
+                _ = s.deployRepo.UpdateStatus(ctx, rollback.ID, model.DeployStatusFailed)
+                return
+        }
+
+        if err := s.pipeline.RunPipeline(ctx, app, rollback); err != nil {
+                log.Printf("Rollback pipeline failed: app=%d deployment=%d error=%v", appID, rollback.ID, err)
+        }
 }
 
 // EnvVarService handles environment variable business logic

@@ -2,8 +2,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
-RUN npm install -g bun && bun install
+COPY package.json package-lock.json* bun.lock* ./
+
+# Install bun and dependencies
+RUN npm install -g bun && bun install --frozen-lockfile || bun install
 
 COPY . .
 RUN bun run build

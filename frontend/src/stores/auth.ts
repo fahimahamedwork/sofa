@@ -7,7 +7,7 @@ interface AuthState {
   isLoading: boolean;
   login: (password: string) => Promise<void>;
   logout: () => void;
-  init: () => void;
+  init: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
 
   login: async (password: string) => {
-    const { data } = await authApi.login({ password });
+    const { data } = await authApi.login({ username: 'admin', password });
     // Response interceptor unwraps {success, data} envelope
     const token = data.token;
     localStorage.setItem('sofa_token', token);
@@ -29,11 +29,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: null, isAuthenticated: false });
   },
 
-  init: () => {
+  init: async () => {
     const token = localStorage.getItem('sofa_token');
-    if (token) {
+    if (!token) {
+      set({ token: null, isAuthenticated: false, isLoading: false });
+      return;
+    }
+    // Validate the token by calling /auth/profile
+    try {
+      await authApi.getProfile();
       set({ token, isAuthenticated: true, isLoading: false });
-    } else {
+    } catch {
+      // Token is invalid/expired
+      localStorage.removeItem('sofa_token');
       set({ token: null, isAuthenticated: false, isLoading: false });
     }
   },

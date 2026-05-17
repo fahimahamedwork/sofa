@@ -81,20 +81,17 @@ export const deploymentsApi = {
 
 // Env Vars
 export const envVarsApi = {
-  listEnvVars: (slug: string) => api.get<EnvVar[]>(`/apps/${slug}/env`),
-  createEnvVar: (slug: string, data: { key: string; value: string }) => api.post<EnvVar>(`/apps/${slug}/env`, data),
-  updateEnvVar: (slug: string, id: string, data: { key: string; value: string }) => api.patch<EnvVar>(`/apps/${slug}/env/${id}`, data),
-  deleteEnvVar: (slug: string, id: string) => api.delete(`/apps/${slug}/env/${id}`),
+  listEnvVars: (slug: string) => api.get<EnvVar[]>(`/apps/${slug}/env-vars`),
+  createEnvVar: (slug: string, data: { key: string; value: string }) => api.post<EnvVar>(`/apps/${slug}/env-vars`, data),
+  updateEnvVar: (slug: string, id: string, data: { key: string; value: string }) => api.put<EnvVar>(`/apps/${slug}/env-vars`, data),
+  deleteEnvVar: (slug: string, id: string) => api.delete(`/env-vars/${id}`),
 };
 
 // Domains
 export const domainsApi = {
   listDomains: (slug: string) => api.get<Domain[]>(`/apps/${slug}/domains`),
   addDomain: (slug: string, data: AddDomainRequest) => api.post<Domain>(`/apps/${slug}/domains`, data),
-  removeDomain: (slug: string, id: string) => api.delete(`/apps/${slug}/domains/${id}`),
-  verifyDomain: (slug: string, id: string) => api.post(`/apps/${slug}/domains/${id}/verify`),
-  setPrimary: (slug: string, id: string) => api.post(`/apps/${slug}/domains/${id}/primary`),
-  listAllDomains: () => api.get<Domain[]>('/domains'),
+  removeDomain: (slug: string, id: string) => api.delete(`/domains/${id}`),
 };
 
 // Databases
@@ -123,10 +120,5 @@ export const settingsApi = {
 export const activityApi = {
   getRecent: () => api.get<Activity[]>('/activity'),
 };
-
-// Helper to unwrap backend {success, data} response
-export function unwrap<T>(resp: { data: { success: boolean; data: T } }): T {
-  return resp.data.data;
-}
 
 export default api;

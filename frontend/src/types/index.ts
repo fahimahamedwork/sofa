@@ -152,6 +152,7 @@ export interface Activity {
 }
 
 export interface LoginRequest {
+  username?: string;
   password: string;
 }
 

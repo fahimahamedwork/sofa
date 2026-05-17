@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -26,17 +26,17 @@ export function AppSettingsPage() {
   const [memoryLimit, setMemoryLimit] = useState('');
   const [cpuLimit, setCpuLimit] = useState('');
 
-  // Initialize form when app loads
-  const initialized = useState(false);
-  if (app && !initialized[0]) {
-    setName(app.name);
-    setPort(String(app.port));
-    setBuildCommand(app.buildCommand);
-    setStartCommand(app.startCommand);
-    setMemoryLimit(String(app.memoryLimit));
-    setCpuLimit(String(app.cpuLimit));
-    initialized[1](true);
-  }
+  // Initialize form when app loads (using useEffect instead of render-time setState)
+  useEffect(() => {
+    if (app) {
+      setName(app.name || '');
+      setPort(String(app.port || ''));
+      setBuildCommand(app.buildCommand || '');
+      setStartCommand(app.startCommand || '');
+      setMemoryLimit(String(app.memoryLimit || ''));
+      setCpuLimit(String(app.cpuLimit || ''));
+    }
+  }, [app]);
 
   const handleSave = () => {
     updateApp.mutate({

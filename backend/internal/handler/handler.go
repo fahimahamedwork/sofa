@@ -60,6 +60,7 @@ func NewAuthHandler(cfg *config.Config, settingSvc *service.SettingService) *Aut
 }
 
 type LoginRequest struct {
+        Username string `json:"username"`
         Password string `json:"password" binding:"required"`
 }
 
@@ -75,16 +76,22 @@ func (h *AuthHandler) Login(c *gin.Context) {
                 return
         }
 
+        // Username is accepted but currently only "admin" is supported
+        username := req.Username
+        if username == "" {
+                username = "admin"
+        }
+
         adminPassword := h.cfg.Auth.AdminPassword
         if err := bcrypt.CompareHashAndPassword([]byte(adminPassword), []byte(req.Password)); err != nil {
                 // Also allow direct password match for initial setup
                 if req.Password != adminPassword {
-                        errorResponse(c, http.StatusUnauthorized, "Invalid password")
+                        errorResponse(c, http.StatusUnauthorized, "Invalid credentials")
                         return
                 }
         }
 
-        token, err := middleware.GenerateToken("admin", "admin", h.cfg.Auth.JWTSecret, h.cfg.Auth.TokenDuration)
+        token, err := middleware.GenerateToken("admin", username, h.cfg.Auth.JWTSecret, h.cfg.Auth.TokenDuration)
         if err != nil {
                 errorResponse(c, http.StatusInternalServerError, "Failed to generate token")
                 return

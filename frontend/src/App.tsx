@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AppLayout } from '@/components/layout/app-layout';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { useAuthStore } from '@/stores/auth';
 import { useEffect } from 'react';
 
@@ -38,7 +39,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-        <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-zinc-500">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -90,7 +94,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </BrowserRouter>
       <Toaster
         theme="dark"

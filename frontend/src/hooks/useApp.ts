@@ -19,7 +19,15 @@ export function useApps() {
     queryKey: ['apps'],
     queryFn: async () => {
       const { data } = await appsApi.listApps();
-      return data;
+      // Backend returns {apps: [...], total, page, page_size} - extract the apps array
+      if (data && typeof data === 'object' && 'apps' in data) {
+        return (data as { apps: unknown[] }).apps;
+      }
+      // Fallback: if data is already an array
+      if (Array.isArray(data)) {
+        return data;
+      }
+      return [];
     },
   });
 }
@@ -143,7 +151,14 @@ export function useDeployments(slug: string) {
     queryKey: ['apps', slug, 'deployments'],
     queryFn: async () => {
       const { data } = await deploymentsApi.listDeployments(slug);
-      return data;
+      // Backend returns {deployments: [...], total, page, page_size}
+      if (data && typeof data === 'object' && 'deployments' in data) {
+        return (data as { deployments: unknown[] }).deployments;
+      }
+      if (Array.isArray(data)) {
+        return data;
+      }
+      return [];
     },
     enabled: !!slug,
   });
@@ -190,7 +205,8 @@ export function useEnvVars(slug: string) {
     queryKey: ['apps', slug, 'env'],
     queryFn: async () => {
       const { data } = await envVarsApi.listEnvVars(slug);
-      return data;
+      if (Array.isArray(data)) return data;
+      return [];
     },
     enabled: !!slug,
   });
@@ -252,7 +268,8 @@ export function useAppDomains(slug: string) {
     queryKey: ['apps', slug, 'domains'],
     queryFn: async () => {
       const { data } = await domainsApi.listDomains(slug);
-      return data;
+      if (Array.isArray(data)) return data;
+      return [];
     },
     enabled: !!slug,
   });
@@ -297,6 +314,10 @@ export function useAppMetrics(slug: string) {
     queryKey: ['apps', slug, 'metrics'],
     queryFn: async () => {
       const { data } = await metricsApi.getAppMetrics(slug);
+      // Backend returns {app_id, app_name, status, metrics: {...}}
+      if (data && typeof data === 'object' && 'metrics' in data) {
+        return (data as { metrics: unknown }).metrics;
+      }
       return data;
     },
     enabled: !!slug,

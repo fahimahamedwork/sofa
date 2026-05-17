@@ -523,6 +523,45 @@ func (h *DomainHandler) ListDomains(c *gin.Context) {
         successResponse(c, http.StatusOK, domains)
 }
 
+func (h *DomainHandler) ListAllDomains(c *gin.Context) {
+        // List all domains across all apps
+        domains, err := h.domainSvc.ListAllDomains(c.Request.Context())
+        if err != nil {
+                errorResponse(c, http.StatusInternalServerError, "Failed to list domains")
+                return
+        }
+
+        successResponse(c, http.StatusOK, domains)
+}
+
+func (h *DomainHandler) VerifyDomain(c *gin.Context) {
+        id, ok := getIDParam(c, "id")
+        if !ok {
+                return
+        }
+
+        if err := h.domainSvc.VerifyDomain(c.Request.Context(), id); err != nil {
+                errorResponse(c, http.StatusInternalServerError, "Failed to verify domain")
+                return
+        }
+
+        successResponse(c, http.StatusOK, gin.H{"message": "Domain verification initiated"})
+}
+
+func (h *DomainHandler) SetPrimary(c *gin.Context) {
+        id, ok := getIDParam(c, "id")
+        if !ok {
+                return
+        }
+
+        if err := h.domainSvc.SetPrimary(c.Request.Context(), id); err != nil {
+                errorResponse(c, http.StatusInternalServerError, "Failed to set primary domain")
+                return
+        }
+
+        successResponse(c, http.StatusOK, gin.H{"message": "Primary domain updated"})
+}
+
 func (h *DomainHandler) AddDomain(c *gin.Context) {
         appID, ok := getIDParam(c, "id")
         if !ok {
@@ -579,6 +618,17 @@ func (h *DatabaseHandler) ListDatabases(c *gin.Context) {
         }
 
         databases, err := h.dbSvc.ListDatabases(c.Request.Context(), appID)
+        if err != nil {
+                errorResponse(c, http.StatusInternalServerError, "Failed to list databases")
+                return
+        }
+
+        successResponse(c, http.StatusOK, databases)
+}
+
+func (h *DatabaseHandler) ListAllDatabases(c *gin.Context) {
+        // List all databases across all apps
+        databases, err := h.dbSvc.ListAllDatabases(c.Request.Context())
         if err != nil {
                 errorResponse(c, http.StatusInternalServerError, "Failed to list databases")
                 return
@@ -988,12 +1038,16 @@ func RegisterRoutes(
                 // Domain routes
                 domains := protected.Group("/domains")
                 {
+                        domains.GET("", domainHandler.ListAllDomains)
                         domains.DELETE("/:id", domainHandler.RemoveDomain)
+                        domains.POST("/:id/verify", domainHandler.VerifyDomain)
+                        domains.POST("/:id/set-primary", domainHandler.SetPrimary)
                 }
 
                 // Database routes
                 databases := protected.Group("/databases")
                 {
+                        databases.GET("", dbHandler.ListAllDatabases)
                         databases.DELETE("/:id", dbHandler.RemoveDB)
                 }
 

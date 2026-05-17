@@ -122,3 +122,21 @@ export function maskString(str: string, visible: number = 4): string {
   if (str.length <= visible) return str;
   return str.substring(0, visible) + '*'.repeat(Math.min(str.length - visible, 20));
 }
+
+/**
+ * Recursively converts snake_case keys in an object to camelCase.
+ * This is needed because the Go backend returns snake_case JSON keys,
+ * but the TypeScript types use camelCase.
+ */
+export function snakeToCamel<T>(obj: unknown): T {
+  if (obj === null || obj === undefined) return obj as T;
+  if (Array.isArray(obj)) return obj.map((item) => snakeToCamel(item)) as T;
+  if (typeof obj !== 'object') return obj as T;
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    result[camelKey] = snakeToCamel(value);
+  }
+  return result as T;
+}

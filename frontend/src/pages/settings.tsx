@@ -65,7 +65,7 @@ function ServerTab({ stats, isLoading }: { stats: ReturnType<typeof useServerSta
           <InfoRow label="Hostname" value={stats?.hostname || 'N/A'} />
           <InfoRow label="Operating System" value={stats?.os || 'N/A'} />
           <InfoRow label="Docker Version" value={stats?.dockerVersion || 'N/A'} />
-          <InfoRow label="Uptime" value={stats ? formatDuration(stats.uptime) : 'N/A'} />
+          <InfoRow label="Uptime" value={stats?.uptime != null ? formatDuration(stats.uptime) : 'N/A'} />
         </CardContent>
       </Card>
 
@@ -76,11 +76,11 @@ function ServerTab({ stats, isLoading }: { stats: ReturnType<typeof useServerSta
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <InfoRow label="Total Disk" value={stats ? formatBytes(stats.diskTotal) : 'N/A'} />
-          <InfoRow label="Used Disk" value={stats ? formatBytes(stats.diskUsed) : 'N/A'} />
-          <InfoRow label="Disk Usage" value={stats ? `${stats.diskUsage.toFixed(1)}%` : 'N/A'} />
-          <InfoRow label="CPU Cores" value={stats ? String(stats.cpuCores) : 'N/A'} />
-          <InfoRow label="Total RAM" value={stats ? formatBytes(stats.memoryTotal) : 'N/A'} />
+          <InfoRow label="Total Disk" value={stats?.diskTotal ? formatBytes(stats.diskTotal) : 'N/A'} />
+          <InfoRow label="Used Disk" value={stats?.diskUsed ? formatBytes(stats.diskUsed) : 'N/A'} />
+          <InfoRow label="Disk Usage" value={stats?.diskUsage != null ? `${stats.diskUsage.toFixed(1)}%` : 'N/A'} />
+          <InfoRow label="CPU Cores" value={stats?.cpuCores != null ? String(stats.cpuCores) : 'N/A'} />
+          <InfoRow label="Total RAM" value={stats?.memoryTotal ? formatBytes(stats.memoryTotal) : 'N/A'} />
         </CardContent>
       </Card>
     </div>

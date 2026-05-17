@@ -10,11 +10,13 @@ import type {
   App,
   Deployment,
   AppMetrics,
+  ServerStats,
   CreateAppRequest,
   UpdateAppRequest,
   AddDomainRequest,
 } from '@/types';
 import { toast } from 'sonner';
+import { snakeToCamel } from '@/lib/utils';
 
 // App queries
 export function useApps() {
@@ -319,9 +321,9 @@ export function useAppMetrics(slug: string) {
       const { data } = await metricsApi.getAppMetrics(slug);
       // Backend returns {app_id, app_name, status, metrics: {...}}
       if (data && typeof data === 'object' && 'metrics' in data) {
-        return (data as { metrics: AppMetrics }).metrics;
+        return snakeToCamel<AppMetrics>((data as { metrics: unknown }).metrics);
       }
-      return data as AppMetrics | undefined;
+      return snakeToCamel<AppMetrics>(data);
     },
     enabled: !!slug,
     refetchInterval: 10000,
@@ -333,7 +335,7 @@ export function useServerStats() {
     queryKey: ['server', 'stats'],
     queryFn: async () => {
       const { data } = await metricsApi.getServerStats();
-      return data;
+      return snakeToCamel<ServerStats>(data);
     },
     refetchInterval: 10000,
   });

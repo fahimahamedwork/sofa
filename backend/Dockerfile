@@ -1,5 +1,8 @@
 FROM golang:1.23-alpine AS builder
 
+# Allow Go to auto-download the required toolchain (e.g. go1.25 for newer deps)
+ENV GOTOOLCHAIN=auto
+
 WORKDIR /app
 
 RUN apk add --no-cache git gcc musl-dev
